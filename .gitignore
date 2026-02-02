@@ -1,0 +1,98 @@
+# Prometheus data directories
+data/
+prometheus_data/
+storage/
+tsdb/
+wal/
+
+# Grafana data
+grafana_data/
+grafana/data/
+grafana/logs/
+
+# Alertmanager data
+alertmanager_data/
+
+# Log files
+*.log
+logs/
+Logs/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+secrets/
+**/.secrets/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.sublime-*
+*.swp
+*.swo
+
+# Docker related
+.dockerignore
+docker-data/
+.docker/
+
+# Backup files
+*.bak
+*.backup
+
+# Cache files
+.cache/
+*.cache
+
+# SSL certificates and keys (security)
+*.key
+*.pem
+*.crt
+*.cert
+*.p12
+*.pfx
+*.csr
+*.srl
+
+# Configuration backups
+*.yml.bak
+*.yaml.bak
+*.json.bak
+
+# Metrics data (large files)
+metrics/
+
+# Node exporter textfile collector
+textfile_collector/
+
+# Blackbox exporter cache
+blackbox_cache/
+
+# Custom exporter data
+exporter_data/
+
+# Windows executable files
+*.exe
+*.msi
+*.zip
+
+# Service files
+*.service
+nssm.log
