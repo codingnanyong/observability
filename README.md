@@ -157,7 +157,7 @@ docker-compose -f os/docker-compose.yml up -d
 ### **📡 Infrastructure Targets**
 
 | Category | Targets | Metrics |
-|----------|---------|---------|
+| ------ | ------ | ------ |
 | **Linux Servers** | Production hosts, development servers | CPU, Memory, Disk, Network |
 | **Windows Hosts** | Windows servers, workstations | System performance, services |
 | **Banbury Sites** | Manufacturing facility systems | Industrial metrics, connectivity |
@@ -166,7 +166,7 @@ docker-compose -f os/docker-compose.yml up -d
 ### **🔧 Platform Services**
 
 | Service | Port | Monitoring Focus |
-|---------|------|------------------|
+| ------ | ------ | ------ |
 | **Airflow** | 8080 | DAG performance, task duration, worker health |
 | **PostgreSQL** | 5432 | Query performance, connections, replication |
 | **InfluxDB** | 8086 | Write performance, query latency, storage |
@@ -214,7 +214,7 @@ All exporters are available as Docker containers with pre-configured compose fil
 ## 📚 **Documentation**
 
 | Component | Documentation |
-|-----------|---------------|
+| ------ | ------ |
 | **[Prometheus Setup](./prometheus/README.md)** | Prometheus configuration guide |
 | **[Grafana Dashboards](./grafana/README.md)** | Dashboard setup and customization |
 | **[Exporters Guide](./exporter/README.md)** | Custom exporter deployment |
