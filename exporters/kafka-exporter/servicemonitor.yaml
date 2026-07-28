@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kafka-exporter
+  namespace: observability
+  labels:
+    release: kube-prometheus-stack
+    app.kubernetes.io/part-of: observability
+    app.kubernetes.io/name: kafka-exporter
+spec:
+  namespaceSelector:
+    matchNames:
+      - kafka
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kafka-exporter
+  endpoints:
+    - port: metrics
+      interval: 30s
+      scrapeTimeout: 15s
+      path: /metrics
