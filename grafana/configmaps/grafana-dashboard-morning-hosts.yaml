@@ -1,0 +1,1260 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-morning-hosts
+  namespace: observability
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Observability"
+data:
+  morning-hosts.json: |-
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [
+        {
+          "title": "← Status",
+          "type": "link",
+          "icon": "doc",
+          "url": "/d/morning-overview",
+          "tooltip": "← Status",
+          "targetBlank": false,
+          "keepTime": true,
+          "asDropdown": false,
+          "includeVars": false,
+          "tags": []
+        },
+        {
+          "title": "이동",
+          "type": "dashboards",
+          "icon": "dashboard",
+          "tags": [
+            "morning-nav"
+          ],
+          "asDropdown": true,
+          "tooltip": "Hosts · DBs · Pipe · APIs · Obs",
+          "targetBlank": false,
+          "keepTime": true,
+          "includeVars": false,
+          "url": ""
+        }
+      ],
+      "panels": [
+        {
+          "id": 1,
+          "type": "text",
+          "title": "",
+          "gridPos": {
+            "h": 4,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "**Hosts** · [← Status](/d/morning-overview) · [K8s](/d/morning-k8s) · [worker-01](/d/morning-host-node?var-node=worker-01) · [worker-02](/d/morning-host-node?var-node=worker-02)\n\n① **K8s 클러스터** → ② Host 점유율 → 클릭 시 OS · Pod · Docker · Soft 80 · Hard 90"
+          },
+          "transparent": false
+        },
+        {
+          "id": 2,
+          "type": "row",
+          "title": "K8s 클러스터 · 클릭 → 상세 (legacy)",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 4
+          },
+          "panels": []
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "Nodes Ready",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 0,
+            "y": 5
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum(kube_node_status_condition{condition=\"Ready\",status=\"true\"}) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "green",
+                    "value": 2
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "K8s 상세",
+                  "url": "/d/morning-k8s",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 2
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Ready=True 노드 수. 경고 <1 · 정상 ≥2"
+        },
+        {
+          "id": 4,
+          "type": "stat",
+          "title": "Nodes NotReady",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 6,
+            "y": 5
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum(kube_node_status_condition{condition=\"Ready\",status=\"false\"} == 1) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "K8s 상세",
+                  "url": "/d/morning-k8s",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Ready=False 노드 수. Soft ≥1 · Hard ≥2"
+        },
+        {
+          "id": 5,
+          "type": "stat",
+          "title": "Bad Pods",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 5
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum((kube_pod_status_phase{namespace=~\"kafka|airflow|postgres|observability|data|api-core|api-portal\",phase=~\"Failed|Unknown\"} == 1)) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 3
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "K8s 상세",
+                  "url": "/d/morning-k8s",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Failed/Unknown phase Pod 수. Soft ≥1 · Hard ≥3"
+        },
+        {
+          "id": 6,
+          "type": "stat",
+          "title": "Deploy Gaps",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 18,
+            "y": 5
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum(kube_deployment_status_replicas_unavailable{namespace=~\"kafka|airflow|postgres|observability|data|api-core|api-portal\"}) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 3
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "K8s 상세",
+                  "url": "/d/morning-k8s",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "unavailable replica 합. Soft ≥1 · Hard ≥3"
+        },
+        {
+          "id": 7,
+          "type": "row",
+          "title": "worker-01 · 클릭 → OS / Pod / Docker",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 10
+          },
+          "panels": []
+        },
+        {
+          "id": 8,
+          "type": "stat",
+          "title": "Ready",
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 0,
+            "y": 11
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(kube_node_status_condition{node=\"worker-01\",condition=\"Ready\",status=\"true\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 0,
+                    "to": 0,
+                    "result": {
+                      "text": "DOWN",
+                      "color": "red",
+                      "index": 0
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 1,
+                    "to": 1,
+                    "result": {
+                      "text": "UP",
+                      "color": "green",
+                      "index": 1
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "NO DATA",
+                      "color": "orange",
+                      "index": 2
+                    }
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-host-node?var-node=worker-01",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "worker-01 노드 Ready 조건."
+        },
+        {
+          "id": 9,
+          "type": "stat",
+          "title": "CPU %",
+          "gridPos": {
+            "h": 4,
+            "w": 5,
+            "x": 4,
+            "y": 11
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(morning:node_cpu_util:percent{instance=\"worker-01\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-host-node?var-node=worker-01",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "worker-01 · Soft ≥80 · Hard ≥90"
+        },
+        {
+          "id": 10,
+          "type": "stat",
+          "title": "Memory %",
+          "gridPos": {
+            "h": 4,
+            "w": 5,
+            "x": 9,
+            "y": 11
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(morning:node_mem_util:percent{instance=\"worker-01\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-host-node?var-node=worker-01",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "worker-01 · Soft ≥80 · Hard ≥90"
+        },
+        {
+          "id": 11,
+          "type": "stat",
+          "title": "Disk / %",
+          "gridPos": {
+            "h": 4,
+            "w": 5,
+            "x": 14,
+            "y": 11
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(morning:node_disk_root_util:percent{instance=\"worker-01\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-host-node?var-node=worker-01",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "worker-01 · Soft ≥80 · Hard ≥90"
+        },
+        {
+          "id": 12,
+          "type": "stat",
+          "title": "Disk /media %",
+          "gridPos": {
+            "h": 4,
+            "w": 5,
+            "x": 19,
+            "y": 11
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(morning:node_disk_media_util:percent{instance=\"worker-01\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-host-node?var-node=worker-01",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "worker-01 · Soft ≥80 · Hard ≥90"
+        },
+        {
+          "id": 13,
+          "type": "row",
+          "title": "worker-02 · 클릭 → OS / Pod / Docker",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 15
+          },
+          "panels": []
+        },
+        {
+          "id": 14,
+          "type": "stat",
+          "title": "Ready",
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 0,
+            "y": 16
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(kube_node_status_condition{node=\"worker-02\",condition=\"Ready\",status=\"true\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 0,
+                    "to": 0,
+                    "result": {
+                      "text": "DOWN",
+                      "color": "red",
+                      "index": 0
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 1,
+                    "to": 1,
+                    "result": {
+                      "text": "UP",
+                      "color": "green",
+                      "index": 1
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "NO DATA",
+                      "color": "orange",
+                      "index": 2
+                    }
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-host-node?var-node=worker-02",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "worker-02 노드 Ready 조건."
+        },
+        {
+          "id": 15,
+          "type": "stat",
+          "title": "CPU %",
+          "gridPos": {
+            "h": 4,
+            "w": 5,
+            "x": 4,
+            "y": 16
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(morning:node_cpu_util:percent{instance=\"worker-02\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-host-node?var-node=worker-02",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "worker-02 · Soft ≥80 · Hard ≥90"
+        },
+        {
+          "id": 16,
+          "type": "stat",
+          "title": "Memory %",
+          "gridPos": {
+            "h": 4,
+            "w": 5,
+            "x": 9,
+            "y": 16
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(morning:node_mem_util:percent{instance=\"worker-02\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-host-node?var-node=worker-02",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "worker-02 · Soft ≥80 · Hard ≥90"
+        },
+        {
+          "id": 17,
+          "type": "stat",
+          "title": "Disk / %",
+          "gridPos": {
+            "h": 4,
+            "w": 5,
+            "x": 14,
+            "y": 16
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(morning:node_disk_root_util:percent{instance=\"worker-02\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-host-node?var-node=worker-02",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "worker-02 · Soft ≥80 · Hard ≥90"
+        },
+        {
+          "id": 18,
+          "type": "stat",
+          "title": "Disk /media %",
+          "gridPos": {
+            "h": 4,
+            "w": 5,
+            "x": 19,
+            "y": 16
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(morning:node_disk_media_util:percent{instance=\"worker-02\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-host-node?var-node=worker-02",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "worker-02 · Soft ≥80 · Hard ≥90"
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "tags": [
+        "morning",
+        "hosts",
+        "morning-nav"
+      ],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "Asia/Seoul",
+      "title": "Morning · Hosts",
+      "uid": "morning-hosts",
+      "version": 1
+    }
