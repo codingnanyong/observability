@@ -4,7 +4,7 @@ Versioned docs mirrored for GitHub Wiki pages.
 
 | Page | Description |
 |------|-------------|
-| [Getting Started](Getting-Started.md) | Clone, targets, first apply |
+| [Getting Started](Getting-Started.md) | Clone, Helm install, first apply |
 | [Architecture](Architecture.md) | Stack layers |
 | [Kubernetes Exporters](Kubernetes-Exporters.md) | base/ + exporters/ |
 | [Morning Dashboards](Morning-Dashboards.md) | Grafana hierarchy |

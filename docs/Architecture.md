@@ -2,10 +2,10 @@
 
 High-level layers:
 
-1. **Targets** — infrastructure hosts, platforms (Airflow/DB), services
-2. **Exporters** — node, Windows, blackbox, DB, Kafka, custom
-3. **Prometheus** — scrape, TSDB, rules, Alertmanager
-4. **Grafana** — Morning hierarchy + Kubernetes folders
+1. **Targets** — hosts, platforms (Airflow/DB/Kafka), APIs
+2. **Exporters** — in-cluster DaemonSets/Deployments + ServiceMonitors (`exporters/`)
+3. **Prometheus** — Helm `kube-prometheus-stack` via `prometheus/helm-values.yaml`
+4. **Grafana** — Morning hierarchy via ConfigMap sidecar
 
 ## Kubernetes layout (generic names)
 
