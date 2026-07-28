@@ -1,10 +1,6 @@
 # 📊 Enterprise Observability Stack
 
-[![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?logo=prometheus&logoColor=white)](https://prometheus.io/)
-[![Grafana](https://img.shields.io/badge/Grafana-F46800?logo=grafana&logoColor=white)](https://grafana.com/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
-[![AlertManager](https://img.shields.io/badge/AlertManager-E6522C?logo=prometheus&logoColor=white)](https://prometheus.io/docs/alerting/latest/alertmanager/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?logo=prometheus&logoColor=white)](https://prometheus.io/) [![Grafana](https://img.shields.io/badge/Grafana-F46800?logo=grafana&logoColor=white)](https://grafana.com/) [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/) [![AlertManager](https://img.shields.io/badge/AlertManager-E6522C?logo=prometheus&logoColor=white)](https://prometheus.io/docs/alerting/latest/alertmanager/) [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Complete observability solution for enterprise infrastructure monitoring with Prometheus metrics collection, Grafana visualization, and comprehensive alerting across multi-platform environments.
 
@@ -18,7 +14,7 @@ Complete observability solution for enterprise infrastructure monitoring with Pr
 │                 │                 │                         │
 │ • Linux Servers │ • Airflow       │ • OpenAPI Services      │
 │ • Windows Hosts │ • Databases     │ • Web Applications      │
-│ • Banbury Sites │ • InfluxDB      │ • Custom Exporters      │
+│ • windows-app Sites │ • InfluxDB      │ • Custom Exporters  │
 └─────────────────┴─────────────────┴─────────────────────────┘
                             │
                             ▼
@@ -59,7 +55,7 @@ observability/
 │   ├── alertmanager.yml            # Alert routing
 │   ├── targets/                    # Target configurations
 │   │   ├── infrastructure/         # Server monitoring
-│   │   │   ├── banbury.json        # Banbury site targets
+│   │   │   ├── windows-app.json        # windows-app site targets
 │   │   │   ├── linux.json          # Linux servers
 │   │   │   └── windows.json        # Windows hosts
 │   │   ├── platform/              # Platform services
@@ -93,9 +89,9 @@ observability/
 ### 🔍 **Comprehensive Monitoring**
 
 - **Infrastructure Monitoring**: Linux/Windows servers, network devices
-- **Application Performance**: Airflow, databases, web services  
+- **Application Performance**: Airflow, databases, web services
 - **Business Metrics**: Custom application metrics and KPIs
-- **Multi-site Coverage**: Banbury manufacturing sites integration
+- **Multi-site Coverage**: windows-app manufacturing sites integration
 
 ### 📊 **Advanced Visualization**
 
@@ -156,26 +152,26 @@ docker-compose -f os/docker-compose.yml up -d
 
 ### **📡 Infrastructure Targets**
 
-| Category | Targets | Metrics |
-| ------ | ------ | ------ |
-| **Linux Servers** | Production hosts, development servers | CPU, Memory, Disk, Network |
-| **Windows Hosts** | Windows servers, workstations | System performance, services |
-| **Banbury Sites** | Manufacturing facility systems | Industrial metrics, connectivity |
-| **Network** | Switches, routers, firewalls | Bandwidth, latency, availability |
+| Category              | Targets                               | Metrics                          |
+| --------------------- | ------------------------------------- | -------------------------------- |
+| **Linux Servers**     | Production hosts, development servers | CPU, Memory, Disk, Network       |
+| **Windows Hosts**     | Windows servers, workstations         | System performance, services     |
+| **windows-app Sites** | Manufacturing facility systems        | Industrial metrics, connectivity |
+| **Network**           | Switches, routers, firewalls          | Bandwidth, latency, availability |
 
 ### **🔧 Platform Services**
 
-| Service | Port | Monitoring Focus |
-| ------ | ------ | ------ |
-| **Airflow** | 8080 | DAG performance, task duration, worker health |
-| **PostgreSQL** | 5432 | Query performance, connections, replication |
-| **InfluxDB** | 8086 | Write performance, query latency, storage |
-| **MongoDB** | 27017 | Operations, replication lag, storage |
+| Service        | Port  | Monitoring Focus                              |
+| -------------- | ----- | --------------------------------------------- |
+| **Airflow**    | 8080  | DAG performance, task duration, worker health |
+| **PostgreSQL** | 5432  | Query performance, connections, replication   |
+| **InfluxDB**   | 8086  | Write performance, query latency, storage     |
+| **MongoDB**    | 27017 | Operations, replication lag, storage          |
 
 ### **🌐 Application Services**
 
 - **OpenAPI Services**: Response times, error rates, throughput
-- **Web Applications**: User metrics, performance monitoring  
+- **Web Applications**: User metrics, performance monitoring
 - **Custom Applications**: Business-specific KPIs and metrics
 
 ## 📊 **Available Exporters**
@@ -213,12 +209,12 @@ All exporters are available as Docker containers with pre-configured compose fil
 
 ## 📚 **Documentation**
 
-| Component | Documentation |
-| ------ | ------ |
-| **[Prometheus Setup](./prometheus/README.md)** | Prometheus configuration guide |
-| **[Grafana Dashboards](./grafana/README.md)** | Dashboard setup and customization |
-| **[Exporters Guide](./exporter/README.md)** | Custom exporter deployment |
-| **[Windows Exporters](./prometheus/exporters/windows/README.md)** | Windows-specific monitoring |
+| Component                                                         | Documentation                     |
+| ----------------------------------------------------------------- | --------------------------------- |
+| **[Prometheus Setup](./prometheus/README.md)**                    | Prometheus configuration guide    |
+| **[Grafana Dashboards](./grafana/README.md)**                     | Dashboard setup and customization |
+| **[Exporters Guide](./exporter/README.md)**                       | Custom exporter deployment        |
+| **[Windows Exporters](./prometheus/exporters/windows/README.md)** | Windows-specific monitoring       |
 
 ## 🔧 **Configuration**
 
@@ -229,7 +225,7 @@ All exporters are available as Docker containers with pre-configured compose fil
 GF_SECURITY_ADMIN_USER=admin
 GF_SECURITY_ADMIN_PASSWORD=your-password
 
-# Prometheus Configuration  
+# Prometheus Configuration
 PROMETHEUS_STORAGE_RETENTION=15d
 PROMETHEUS_STORAGE_RETENTION_SIZE=10GB
 ```
@@ -264,12 +260,12 @@ Add new monitoring targets by creating JSON files in the `targets/` directory:
 ✅ **Business Intelligence** - KPI tracking, operational metrics  
 ✅ **DevOps Integration** - CI/CD pipeline monitoring, deployment tracking  
 ✅ **Capacity Planning** - Resource utilization analysis, growth forecasting  
-✅ **Incident Response** - Real-time alerting, automated notifications  
+✅ **Incident Response** - Real-time alerting, automated notifications
 
 ## 🏆 **Production Stats**
 
-- **Multi-site Monitoring**: Banbury manufacturing facilities
-- **100+ Targets**: Servers, applications, and services  
+- **Multi-site Monitoring**: windows-app manufacturing facilities
+- **100+ Targets**: Servers, applications, and services
 - **24/7 Alerting**: Real-time incident detection
 - **Enterprise Scale**: TB-level metrics storage and processing
 - **High Availability**: Clustered deployment with redundancy
