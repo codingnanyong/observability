@@ -1,0 +1,774 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-morning-datapipeline
+  namespace: observability
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Observability"
+data:
+  morning-datapipeline.json: |-
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [
+        {
+          "title": "← Status",
+          "type": "link",
+          "icon": "doc",
+          "url": "/d/morning-overview",
+          "tooltip": "← Status",
+          "targetBlank": false,
+          "keepTime": true,
+          "asDropdown": false,
+          "includeVars": false,
+          "tags": []
+        },
+        {
+          "title": "이동",
+          "type": "dashboards",
+          "icon": "dashboard",
+          "tags": [
+            "morning-nav"
+          ],
+          "asDropdown": true,
+          "tooltip": "Hosts · DBs · Pipe · APIs · Obs",
+          "targetBlank": false,
+          "keepTime": true,
+          "includeVars": false,
+          "url": ""
+        }
+      ],
+      "panels": [
+        {
+          "id": 1,
+          "type": "text",
+          "title": "",
+          "gridPos": {
+            "h": 4,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "**DataPipeline** · [← Status](/d/morning-overview) · [Airflow](/d/morning-airflow-perf) · [Kafka](/d/morning-kafka-perf)\n\n클릭 → **바로 차트/상세** · CTM Soft 150k · Task fail Soft ≥5"
+          },
+          "transparent": false
+        },
+        {
+          "id": 2,
+          "type": "row",
+          "title": "Airflow · 클릭 → 차트/상세",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 4
+          },
+          "panels": []
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "StatsD",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 0,
+            "y": 5
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(up{job=\"airflow-statsd\"}) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 0,
+                    "to": 0,
+                    "result": {
+                      "text": "DOWN",
+                      "color": "red",
+                      "index": 0
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 1,
+                    "to": 1,
+                    "result": {
+                      "text": "UP",
+                      "color": "green",
+                      "index": 1
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "NO DATA",
+                      "color": "orange",
+                      "index": 2
+                    }
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-airflow-perf",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Airflow StatsD exporter scrape."
+        },
+        {
+          "id": 4,
+          "type": "stat",
+          "title": "Scheduler",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 6,
+            "y": 5
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "clamp_max(count(kube_pod_status_ready{namespace=\"airflow\",pod=~\"airflow-scheduler-.*\",condition=\"true\"}==1), 1) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 0,
+                    "to": 0,
+                    "result": {
+                      "text": "DOWN",
+                      "color": "red",
+                      "index": 0
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 1,
+                    "to": 1,
+                    "result": {
+                      "text": "UP",
+                      "color": "green",
+                      "index": 1
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "NO DATA",
+                      "color": "orange",
+                      "index": 2
+                    }
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-airflow-perf",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Scheduler Pod Ready."
+        },
+        {
+          "id": 5,
+          "type": "stat",
+          "title": "Task fail 5m",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 5
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum(increase(airflow_ti_failures[5m])) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 5
+                  },
+                  {
+                    "color": "red",
+                    "value": 20
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-airflow-perf",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "최근 5분 TI 실패 수. Soft ≥5 · Hard ≥20"
+        },
+        {
+          "id": 6,
+          "type": "stat",
+          "title": "Task OK 5m",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 18,
+            "y": 5
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum(increase(airflow_ti_successes[5m])) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-airflow-perf",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "최근 5분 TI 성공 수."
+        },
+        {
+          "id": 7,
+          "type": "row",
+          "title": "Kafka · 클릭 → 차트/상세",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 10
+          },
+          "panels": []
+        },
+        {
+          "id": 8,
+          "type": "stat",
+          "title": "Brokers",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 0,
+            "y": 11
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "count(kube_pod_status_ready{namespace=\"kafka\",pod=~\"kafka-cluster-combined-.*\",condition=\"true\"}==1) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 2
+                  },
+                  {
+                    "color": "green",
+                    "value": 3
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-kafka-perf",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Ready broker Pod 수. 경고 <2 · 정상 ≥3"
+        },
+        {
+          "id": 9,
+          "type": "stat",
+          "title": "Broken",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 6,
+            "y": 11
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum(kafka_connect_connector_running == bool 0) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-kafka-perf",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Running이 아닌 connector 수. Soft ≥1 · Hard ≥2"
+        },
+        {
+          "id": 10,
+          "type": "stat",
+          "title": "CTM Lag",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 11
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"}) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 150000
+                  },
+                  {
+                    "color": "red",
+                    "value": 500000
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-kafka-perf",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "CTM sink consumergroup lag 합. Soft ≥150000 · Hard ≥500000"
+        },
+        {
+          "id": 11,
+          "type": "stat",
+          "title": "Workers",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 18,
+            "y": 11
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "count(kube_pod_status_ready{namespace=\"kafka\",pod=~\"kafka-connect-connect-.*\",condition=\"true\"}==1) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "green",
+                    "value": 2
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-kafka-perf",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Connect worker Ready 수. 경고 <1 · 정상 ≥2"
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "tags": [
+        "morning",
+        "datapipeline",
+        "morning-nav"
+      ],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "Asia/Seoul",
+      "title": "Morning · DataPipeline",
+      "uid": "morning-datapipeline",
+      "version": 1
+    }

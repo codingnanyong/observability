@@ -1,0 +1,463 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-morning-apis
+  namespace: observability
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Observability"
+data:
+  morning-apis.json: |-
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [
+        {
+          "title": "← Status",
+          "type": "link",
+          "icon": "doc",
+          "url": "/d/morning-overview",
+          "tooltip": "← Status",
+          "targetBlank": false,
+          "keepTime": true,
+          "asDropdown": false,
+          "includeVars": false,
+          "tags": []
+        },
+        {
+          "title": "이동",
+          "type": "dashboards",
+          "icon": "dashboard",
+          "tags": [
+            "morning-nav"
+          ],
+          "asDropdown": true,
+          "tooltip": "Hosts · DBs · Pipe · APIs · Obs",
+          "targetBlank": false,
+          "keepTime": true,
+          "includeVars": false,
+          "url": ""
+        }
+      ],
+      "panels": [
+        {
+          "id": 1,
+          "type": "text",
+          "title": "",
+          "gridPos": {
+            "h": 4,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "**APIs** · [← Status](/d/morning-overview) · [portal](/d/morning-api-svc?var-job=api-portal) · [core](/d/morning-api-svc?var-job=api-core)\n\n클릭 → EP/성능"
+          },
+          "transparent": false
+        },
+        {
+          "id": 2,
+          "type": "row",
+          "title": "서비스 (클릭 → EP 상세)",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 4
+          },
+          "panels": []
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "api-portal",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 0,
+            "y": 5
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "(max(kube_deployment_status_replicas_available{namespace=\"api-portal\",deployment=\"api-portal\"}) > bool 0) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 0,
+                    "to": 0,
+                    "result": {
+                      "text": "DOWN",
+                      "color": "red",
+                      "index": 0
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 1,
+                    "to": 1,
+                    "result": {
+                      "text": "UP",
+                      "color": "green",
+                      "index": 1
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "NO DATA",
+                      "color": "orange",
+                      "index": 2
+                    }
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-api-svc?var-job=api-portal&var-ns=api-portal&var-deploy=api-portal",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          }
+        },
+        {
+          "id": 4,
+          "type": "stat",
+          "title": "api-portal Ready",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 6,
+            "y": 5
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(kube_deployment_status_replicas_available{namespace=\"api-portal\",deployment=\"api-portal\"}) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-api-svc?var-job=api-portal&var-ns=api-portal&var-deploy=api-portal",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "가용 replica 수. 1 이상이면 정상."
+        },
+        {
+          "id": 5,
+          "type": "stat",
+          "title": "api-core",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 5
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "(max(kube_deployment_status_replicas_available{namespace=\"api-core\",deployment=\"api-core\"}) > bool 0) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 0,
+                    "to": 0,
+                    "result": {
+                      "text": "DOWN",
+                      "color": "red",
+                      "index": 0
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 1,
+                    "to": 1,
+                    "result": {
+                      "text": "UP",
+                      "color": "green",
+                      "index": 1
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "NO DATA",
+                      "color": "orange",
+                      "index": 2
+                    }
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-api-svc?var-job=api-core&var-ns=api-core&var-deploy=api-core",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          }
+        },
+        {
+          "id": 6,
+          "type": "stat",
+          "title": "api-core Ready",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 18,
+            "y": 5
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(kube_deployment_status_replicas_available{namespace=\"api-core\",deployment=\"api-core\"}) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-api-svc?var-job=api-core&var-ns=api-core&var-deploy=api-core",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "가용 replica 수. 1 이상이면 정상."
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "tags": [
+        "morning",
+        "apis",
+        "morning-nav"
+      ],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "Asia/Seoul",
+      "title": "Morning · APIs",
+      "uid": "morning-apis",
+      "version": 1
+    }

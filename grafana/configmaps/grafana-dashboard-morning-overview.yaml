@@ -1,0 +1,2169 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-morning-overview
+  namespace: observability
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Observability"
+data:
+  morning-overview.json: |-
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [
+        {
+          "title": "Status",
+          "type": "link",
+          "icon": "info",
+          "url": "/d/morning-overview",
+          "tooltip": "Morning Status",
+          "targetBlank": false,
+          "keepTime": true,
+          "asDropdown": false,
+          "includeVars": false,
+          "tags": []
+        },
+        {
+          "title": "이동",
+          "type": "dashboards",
+          "icon": "dashboard",
+          "tags": [
+            "morning-nav"
+          ],
+          "asDropdown": true,
+          "tooltip": "Hosts · DBs · Pipe · APIs · Obs",
+          "targetBlank": false,
+          "keepTime": true,
+          "includeVars": false,
+          "url": ""
+        }
+      ],
+      "panels": [
+        {
+          "id": 1,
+          "type": "text",
+          "title": "",
+          "gridPos": {
+            "h": 4,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "**Morning Status**\n\n- Left **Status** = Soft / Hard rollup of child metrics (`OK` / `WARN` / `CRIT`)\n- Soft = orange · Hard = red\n- Use the top **Go** menu to switch sections"
+          },
+          "transparent": false
+        },
+        {
+          "id": 2,
+          "type": "row",
+          "title": "Action required",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 4
+          },
+          "panels": [],
+          "repeat": "action_gate"
+        },
+        {
+          "id": 3,
+          "type": "table",
+          "title": "",
+          "description": "Shows only checks past Soft. Hidden when none are firing.",
+          "gridPos": {
+            "h": 5,
+            "w": 24,
+            "x": 0,
+            "y": 5
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "\nlabel_replace(((sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"}) or vector(0)) >= bool 150000), \"check\", \"CTM Lag ≥ 150k\", \"\", \"\")\nor label_replace(((max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0)) >= bool 70), \"check\", \"DB Conn% ≥ 70\", \"\", \"\")\nor label_replace(((sum(increase(airflow_dagrun_failed_count[5m])) or vector(0)) >= bool 1), \"check\", \"DAG fail 5m ≥ 1\", \"\", \"\")\nor label_replace(((sum(increase(airflow_ti_failures[5m])) or vector(0)) >= bool 5), \"check\", \"Task fail 5m ≥ 5\", \"\", \"\")\nor label_replace(((sum(kube_pod_status_phase{namespace=~\"kafka|airflow|postgres|observability|data\",phase=~\"Failed|Unknown\"} == 1) or vector(0)) >= bool 1), \"check\", \"Bad Pods ≥ 1\", \"\", \"\")\nor label_replace(((sum(kafka_connect_connector_state{state=\"FAILED\"}) or vector(0)) >= bool 1), \"check\", \"Connect FAILED ≥ 1\", \"\", \"\")\nor label_replace(((max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) or vector(0)) >= bool 120), \"check\", \"PG idle-in-xact age ≥ 2m\", \"\", \"\")\nor label_replace(((max(morning:node_mem_util:percent) or vector(0)) >= bool 80), \"check\", \"Host Memory ≥ 80%\", \"\", \"\")\nor label_replace(((max(morning:node_cpu_util:percent) or vector(0)) >= bool 80), \"check\", \"Host CPU ≥ 80%\", \"\", \"\")\n",
+              "refId": "A",
+              "format": "table",
+              "instant": true
+            }
+          ],
+          "transformations": [
+            {
+              "id": "labelsToFields",
+              "options": {
+                "mode": "columns",
+                "keepLabels": [
+                  "check"
+                ]
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                },
+                "renameByName": {
+                  "check": "Check",
+                  "Value": "Alert"
+                },
+                "indexByName": {
+                  "Check": 0,
+                  "Alert": 1
+                }
+              }
+            },
+            {
+              "id": "filterByValue",
+              "options": {
+                "type": "include",
+                "match": "all",
+                "filters": [
+                  {
+                    "fieldName": "Alert",
+                    "config": {
+                      "id": "equal",
+                      "options": {
+                        "value": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "sort": [
+                  {
+                    "field": "Check",
+                    "desc": false
+                  }
+                ]
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "decimals": 0,
+              "custom": {
+                "align": "left"
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Alert"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "1": {
+                            "text": "CHECK",
+                            "color": "orange"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background",
+                      "mode": "basic"
+                    }
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green",
+                          "value": null
+                        },
+                        {
+                          "color": "orange",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 120
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false
+            }
+          }
+        },
+        {
+          "id": 4,
+          "type": "row",
+          "title": "Hosts · occupancy (click → Hosts L2)",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 10
+          },
+          "panels": []
+        },
+        {
+          "id": 5,
+          "type": "stat",
+          "title": "Status",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 11
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max((label_replace((clamp_max(((max(morning:node_cpu_util:percent) or vector(0)) >= bool 80) + ((max(morning:node_cpu_util:percent) or vector(0)) >= bool 90), 2)), \"s\", \"0\", \"\", \"\") or label_replace((clamp_max(((max(morning:node_mem_util:percent) or vector(0)) >= bool 80) + ((max(morning:node_mem_util:percent) or vector(0)) >= bool 90), 2)), \"s\", \"1\", \"\", \"\") or label_replace((clamp_max(((max(morning:node_disk_root_util:percent) or vector(0)) >= bool 80) + ((max(morning:node_disk_root_util:percent) or vector(0)) >= bool 90), 2)), \"s\", \"2\", \"\", \"\") or label_replace((clamp_max(((sum(kube_node_status_condition{condition=\"Ready\",status=\"false\"} == 1) or vector(0)) >= bool 1) + ((sum(kube_node_status_condition{condition=\"Ready\",status=\"false\"} == 1) or vector(0)) >= bool 1), 2)), \"s\", \"3\", \"\", \"\")))",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "mappings": [
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 0,
+                    "to": 0,
+                    "result": {
+                      "text": "OK",
+                      "color": "green",
+                      "index": 0
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 1,
+                    "to": 1,
+                    "result": {
+                      "text": "WARN",
+                      "color": "orange",
+                      "index": 1
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 2,
+                    "to": 2,
+                    "result": {
+                      "text": "CRIT",
+                      "color": "red",
+                      "index": 2
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "NO DATA",
+                      "color": "orange",
+                      "index": 3
+                    }
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-hosts",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Rollup of CPU, Memory, Disk Soft/Hard and NotReady."
+        },
+        {
+          "id": 6,
+          "type": "stat",
+          "title": "CPU %",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 11
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "(morning:node_cpu_util:percent) == on() group_left() max(morning:node_cpu_util:percent)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant",
+              "legendFormat": "{{instance}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 1,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Hosts",
+                  "url": "/d/morning-hosts",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value_and_name",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 40,
+              "nameSize": 16
+            },
+            "wideLayout": false
+          },
+          "description": "Max node CPU utilization. Soft ≥80 · Hard ≥90"
+        },
+        {
+          "id": 7,
+          "type": "stat",
+          "title": "Memory %",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 11
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "(morning:node_mem_util:percent) == on() group_left() max(morning:node_mem_util:percent)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant",
+              "legendFormat": "{{instance}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 1,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Hosts",
+                  "url": "/d/morning-hosts",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value_and_name",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 40,
+              "nameSize": 16
+            },
+            "wideLayout": false
+          },
+          "description": "Max node memory utilization. Soft ≥80 · Hard ≥90"
+        },
+        {
+          "id": 8,
+          "type": "stat",
+          "title": "Disk / %",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 11
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "(morning:node_disk_root_util:percent) == on() group_left() max(morning:node_disk_root_util:percent)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant",
+              "legendFormat": "{{instance}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 1,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Hosts",
+                  "url": "/d/morning-hosts",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value_and_name",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 40,
+              "nameSize": 16
+            },
+            "wideLayout": false
+          },
+          "description": "Max root (/) disk utilization. Soft ≥80 · Hard ≥90"
+        },
+        {
+          "id": 9,
+          "type": "row",
+          "title": "DBs · occupancy (click → per DB)",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 15
+          },
+          "panels": []
+        },
+        {
+          "id": 10,
+          "type": "stat",
+          "title": "Status",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 16
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max((label_replace((clamp_max(((count((pg_up{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"} == 1) and on(job, instance) (up{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"} == 1)) or vector(0)) < bool 2) + ((count((pg_up{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"} == 1) and on(job, instance) (up{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"} == 1)) or vector(0)) < bool 1), 2)), \"s\", \"0\", \"\", \"\") or label_replace((clamp_max((((max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0))) >= bool 70) + (((max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0))) >= bool 85), 2)), \"s\", \"1\", \"\", \"\") or label_replace((clamp_max((((max((kubelet_volume_stats_used_bytes{namespace=\"postgres\"} / kubelet_volume_stats_capacity_bytes{namespace=\"postgres\"}) * 100) or vector(0))) >= bool 75) + (((max((kubelet_volume_stats_used_bytes{namespace=\"postgres\"} / kubelet_volume_stats_capacity_bytes{namespace=\"postgres\"}) * 100) or vector(0))) >= bool 90), 2)), \"s\", \"2\", \"\", \"\") or label_replace((clamp_max((((max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) or vector(0))) >= bool 120) + (((max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) or vector(0))) >= bool 300), 2)), \"s\", \"3\", \"\", \"\")))",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "mappings": [
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 0,
+                    "to": 0,
+                    "result": {
+                      "text": "OK",
+                      "color": "green",
+                      "index": 0
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 1,
+                    "to": 1,
+                    "result": {
+                      "text": "WARN",
+                      "color": "orange",
+                      "index": 1
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 2,
+                    "to": 2,
+                    "result": {
+                      "text": "CRIT",
+                      "color": "red",
+                      "index": 2
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "NO DATA",
+                      "color": "orange",
+                      "index": 3
+                    }
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-dbs",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Rollup of exporters, Conn %, PVC, and idle-in-xact Soft/Hard."
+        },
+        {
+          "id": 11,
+          "type": "stat",
+          "title": "Conn % MAX",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 16
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 70
+                  },
+                  {
+                    "color": "red",
+                    "value": 85
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-dbs",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Max DB connection utilization. Soft ≥70 · Hard ≥85"
+        },
+        {
+          "id": 12,
+          "type": "stat",
+          "title": "Idle-in-xact",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 16
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 120
+                  },
+                  {
+                    "color": "red",
+                    "value": 300
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-dbs",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Longest idle-in-transaction age. Soft ≥120 · Hard ≥300"
+        },
+        {
+          "id": 13,
+          "type": "stat",
+          "title": "K8s PVC %",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 16
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max((kubelet_volume_stats_used_bytes{namespace=\"postgres\"} / kubelet_volume_stats_capacity_bytes{namespace=\"postgres\"}) * 100) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 75
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-dbs",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Max PVC utilization in postgres. Soft ≥75 · Hard ≥90"
+        },
+        {
+          "id": 14,
+          "type": "row",
+          "title": "DataPipeline · health (click → Airflow | Kafka)",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 20
+          },
+          "panels": []
+        },
+        {
+          "id": 15,
+          "type": "stat",
+          "title": "Status",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 21
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max((label_replace(((((clamp_max(count(kube_pod_status_ready{namespace=\"airflow\",pod=~\"airflow-scheduler-.*\",condition=\"true\"}==1), 1) or vector(0)) < bool 1) * 2)), \"s\", \"0\", \"\", \"\") or label_replace((clamp_max((((sum(increase(airflow_ti_failures[5m])) or vector(0))) >= bool 5) + (((sum(increase(airflow_ti_failures[5m])) or vector(0))) >= bool 20), 2)), \"s\", \"1\", \"\", \"\") or label_replace((clamp_max((((sum(increase(airflow_dagrun_failed_count[5m])) or vector(0))) >= bool 1) + (((sum(increase(airflow_dagrun_failed_count[5m])) or vector(0))) >= bool 3), 2)), \"s\", \"2\", \"\", \"\") or label_replace((clamp_max((((sum(kafka_connect_connector_running == bool 0) or vector(0))) >= bool 1) + (((sum(kafka_connect_connector_running == bool 0) or vector(0))) >= bool 2), 2)), \"s\", \"3\", \"\", \"\") or label_replace((clamp_max((((sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"}) or vector(0))) >= bool 150000) + (((sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"}) or vector(0))) >= bool 500000), 2)), \"s\", \"4\", \"\", \"\")))",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "mappings": [
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 0,
+                    "to": 0,
+                    "result": {
+                      "text": "OK",
+                      "color": "green",
+                      "index": 0
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 1,
+                    "to": 1,
+                    "result": {
+                      "text": "WARN",
+                      "color": "orange",
+                      "index": 1
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 2,
+                    "to": 2,
+                    "result": {
+                      "text": "CRIT",
+                      "color": "red",
+                      "index": 2
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "NO DATA",
+                      "color": "orange",
+                      "index": 3
+                    }
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-datapipeline",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Rollup of scheduler, AF fail, Broken connectors, and CTM Soft/Hard."
+        },
+        {
+          "id": 16,
+          "type": "stat",
+          "title": "AF fail 5m",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 21
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum(increase(airflow_ti_failures[5m])) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 5
+                  },
+                  {
+                    "color": "red",
+                    "value": 20
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-datapipeline",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Task Instance failures in the last 5 minutes. Soft ≥5 · Hard ≥20"
+        },
+        {
+          "id": 17,
+          "type": "stat",
+          "title": "KF Broken",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 21
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum(kafka_connect_connector_running == bool 0) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-datapipeline",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Connect connectors not in Running state. Soft ≥1 · Hard ≥2"
+        },
+        {
+          "id": 18,
+          "type": "stat",
+          "title": "CTM Lag",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 21
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"}) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 150000
+                  },
+                  {
+                    "color": "red",
+                    "value": 500000
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-datapipeline",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Sum of CTM sink consumergroup lag. Soft ≥150000 · Hard ≥500000"
+        },
+        {
+          "id": 19,
+          "type": "row",
+          "title": "APIs · health (click → services)",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 25
+          },
+          "panels": []
+        },
+        {
+          "id": 20,
+          "type": "stat",
+          "title": "Status",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 26
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max((label_replace((((((max(kube_deployment_status_replicas_available{namespace=\"api-portal\",deployment=\"api-portal\"}) > bool 0) or vector(0)) < bool 1) * 2)), \"s\", \"0\", \"\", \"\") or label_replace((((((max(kube_deployment_status_replicas_available{namespace=\"api-core\",deployment=\"api-core\"}) > bool 0) or vector(0)) < bool 1) * 2)), \"s\", \"1\", \"\", \"\") or label_replace((clamp_max(((((sum(rate(http_requests_total{job=\"api-portal\",status=~\"[45]..\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"api-portal\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0), 1e-9) * 100)) >= bool 1) + ((((sum(rate(http_requests_total{job=\"api-portal\",status=~\"[45]..\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"api-portal\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0), 1e-9) * 100)) >= bool 5), 2)), \"s\", \"2\", \"\", \"\") or label_replace((clamp_max(((((sum(rate(http_requests_total{job=\"api-core\",status=~\"[45]..\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"api-core\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0), 1e-9) * 100)) >= bool 1) + ((((sum(rate(http_requests_total{job=\"api-core\",status=~\"[45]..\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"api-core\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0), 1e-9) * 100)) >= bool 5), 2)), \"s\", \"3\", \"\", \"\")))",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "mappings": [
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 0,
+                    "to": 0,
+                    "result": {
+                      "text": "OK",
+                      "color": "green",
+                      "index": 0
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 1,
+                    "to": 1,
+                    "result": {
+                      "text": "WARN",
+                      "color": "orange",
+                      "index": 1
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 2,
+                    "to": 2,
+                    "result": {
+                      "text": "CRIT",
+                      "color": "red",
+                      "index": 2
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "NO DATA",
+                      "color": "orange",
+                      "index": 3
+                    }
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-apis",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Rollup of deployment availability and HTTP Error % Soft/Hard."
+        },
+        {
+          "id": 21,
+          "type": "stat",
+          "title": "APIs UP",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 26
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "(((max(kube_deployment_status_replicas_available{namespace=\"api-portal\",deployment=\"api-portal\"}) > bool 0) or vector(0)) + ((max(kube_deployment_status_replicas_available{namespace=\"api-core\",deployment=\"api-core\"}) > bool 0) or vector(0)))",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "green",
+                    "value": 2
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-apis",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 2
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Deployments available (expect 2: portal + core). 경고 <1 · 정상 ≥2"
+        },
+        {
+          "id": 22,
+          "type": "stat",
+          "title": "portal Err%",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 26
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "((sum(rate(http_requests_total{job=\"api-portal\",status=~\"[45]..\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"api-portal\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0), 1e-9) * 100)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 1,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-apis",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "api-portal 4xx/5xx ratio (health probes excluded). Soft ≥1 · Hard ≥5"
+        },
+        {
+          "id": 23,
+          "type": "stat",
+          "title": "core Err%",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 26
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "((sum(rate(http_requests_total{job=\"api-core\",status=~\"[45]..\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"api-core\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0), 1e-9) * 100)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 1,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-apis",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "api-core 4xx/5xx ratio (health probes excluded). Soft ≥1 · Hard ≥5"
+        },
+        {
+          "id": 24,
+          "type": "row",
+          "title": "Observability · health (click → detail)",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 30
+          },
+          "panels": []
+        },
+        {
+          "id": 25,
+          "type": "stat",
+          "title": "Status",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 31
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max((label_replace(((((max(up{job=\"kube-prometheus-stack-prometheus\"}) or vector(0)) < bool 1) * 2)), \"s\", \"0\", \"\", \"\") or label_replace(((((max(up{job=\"kube-prometheus-stack-grafana\"}) or clamp_max(count(kube_pod_status_ready{namespace=\"observability\",pod=~\"kube-prometheus-stack-grafana-.*\",condition=\"true\"}==1), 1) or vector(0)) < bool 1) * 2)), \"s\", \"1\", \"\", \"\") or label_replace((clamp_max(((count(up{namespace=\"observability\"} == 0) or vector(0)) >= bool 1) + ((count(up{namespace=\"observability\"} == 0) or vector(0)) >= bool 3), 2)), \"s\", \"2\", \"\", \"\")))",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "mappings": [
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 0,
+                    "to": 0,
+                    "result": {
+                      "text": "OK",
+                      "color": "green",
+                      "index": 0
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 1,
+                    "to": 1,
+                    "result": {
+                      "text": "WARN",
+                      "color": "orange",
+                      "index": 1
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 2,
+                    "to": 2,
+                    "result": {
+                      "text": "CRIT",
+                      "color": "red",
+                      "index": 2
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "NO DATA",
+                      "color": "orange",
+                      "index": 3
+                    }
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-observability",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Rollup of Prometheus/Grafana availability and scrape downs."
+        },
+        {
+          "id": 26,
+          "type": "stat",
+          "title": "Targets DOWN",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 31
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "count(up{namespace=\"observability\"} == 0) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 3
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-observability",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Scrape targets down in the observability namespace. Soft ≥1 · Hard ≥3"
+        },
+        {
+          "id": 27,
+          "type": "stat",
+          "title": "Prometheus",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 31
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(up{job=\"kube-prometheus-stack-prometheus\"}) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 0,
+                    "to": 0,
+                    "result": {
+                      "text": "DOWN",
+                      "color": "red",
+                      "index": 0
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 1,
+                    "to": 1,
+                    "result": {
+                      "text": "UP",
+                      "color": "green",
+                      "index": 1
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "NO DATA",
+                      "color": "orange",
+                      "index": 2
+                    }
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-observability",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Prometheus scrape / availability."
+        },
+        {
+          "id": 28,
+          "type": "stat",
+          "title": "Grafana",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 31
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(up{job=\"kube-prometheus-stack-grafana\"}) or clamp_max(count(kube_pod_status_ready{namespace=\"observability\",pod=~\"kube-prometheus-stack-grafana-.*\",condition=\"true\"}==1), 1) or vector(0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 0,
+                    "to": 0,
+                    "result": {
+                      "text": "DOWN",
+                      "color": "red",
+                      "index": 0
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 1,
+                    "to": 1,
+                    "result": {
+                      "text": "UP",
+                      "color": "green",
+                      "index": 1
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "NO DATA",
+                      "color": "orange",
+                      "index": 2
+                    }
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-observability",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 36
+            }
+          },
+          "description": "Grafana scrape / availability."
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "tags": [
+        "morning",
+        "overview"
+      ],
+      "templating": {
+        "list": [
+          {
+            "name": "action_gate",
+            "type": "query",
+            "label": "",
+            "hide": 2,
+            "refresh": 2,
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "query": "query_result(label_replace(count((label_replace(((sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"}) or vector(0)) >= bool 150000), \"check\", \"CTM Lag ≥ 150k\", \"\", \"\") or label_replace(((max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0)) >= bool 70), \"check\", \"DB Conn% ≥ 70\", \"\", \"\") or label_replace(((sum(increase(airflow_dagrun_failed_count[5m])) or vector(0)) >= bool 1), \"check\", \"DAG fail 5m ≥ 1\", \"\", \"\") or label_replace(((sum(increase(airflow_ti_failures[5m])) or vector(0)) >= bool 5), \"check\", \"Task fail 5m ≥ 5\", \"\", \"\") or label_replace(((sum(kube_pod_status_phase{namespace=~\"kafka|airflow|postgres|observability|data\",phase=~\"Failed|Unknown\"} == 1) or vector(0)) >= bool 1), \"check\", \"Bad Pods ≥ 1\", \"\", \"\") or label_replace(((sum(kafka_connect_connector_state{state=\"FAILED\"}) or vector(0)) >= bool 1), \"check\", \"Connect FAILED ≥ 1\", \"\", \"\") or label_replace(((max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) or vector(0)) >= bool 120), \"check\", \"PG idle-in-xact age ≥ 2m\", \"\", \"\") or label_replace(((max(morning:node_mem_util:percent) or vector(0)) >= bool 80), \"check\", \"Host Memory ≥ 80%\", \"\", \"\") or label_replace(((max(morning:node_cpu_util:percent) or vector(0)) >= bool 80), \"check\", \"Host CPU ≥ 80%\", \"\", \"\")) == 1) > 0, \"gate\", \"발생\", \"\", \"\"))",
+            "regex": "/gate=\"([^\"]+)\"/",
+            "definition": "query_result(label_replace(count((label_replace(((sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"}) or vector(0)) >= bool 150000), \"check\", \"CTM Lag ≥ 150k\", \"\", \"\") or label_replace(((max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0)) >= bool 70), \"check\", \"DB Conn% ≥ 70\", \"\", \"\") or label_replace(((sum(increase(airflow_dagrun_failed_count[5m])) or vector(0)) >= bool 1), \"check\", \"DAG fail 5m ≥ 1\", \"\", \"\") or label_replace(((sum(increase(airflow_ti_failures[5m])) or vector(0)) >= bool 5), \"check\", \"Task fail 5m ≥ 5\", \"\", \"\") or label_replace(((sum(kube_pod_status_phase{namespace=~\"kafka|airflow|postgres|observability|data\",phase=~\"Failed|Unknown\"} == 1) or vector(0)) >= bool 1), \"check\", \"Bad Pods ≥ 1\", \"\", \"\") or label_replace(((sum(kafka_connect_connector_state{state=\"FAILED\"}) or vector(0)) >= bool 1), \"check\", \"Connect FAILED ≥ 1\", \"\", \"\") or label_replace(((max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) or vector(0)) >= bool 120), \"check\", \"PG idle-in-xact age ≥ 2m\", \"\", \"\") or label_replace(((max(morning:node_mem_util:percent) or vector(0)) >= bool 80), \"check\", \"Host Memory ≥ 80%\", \"\", \"\") or label_replace(((max(morning:node_cpu_util:percent) or vector(0)) >= bool 80), \"check\", \"Host CPU ≥ 80%\", \"\", \"\")) == 1) > 0, \"gate\", \"발생\", \"\", \"\"))",
+            "current": {},
+            "options": [],
+            "includeAll": false,
+            "multi": false,
+            "sort": 0
+          }
+        ]
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "Asia/Seoul",
+      "title": "Morning Status",
+      "uid": "morning-overview",
+      "version": 1
+    }
