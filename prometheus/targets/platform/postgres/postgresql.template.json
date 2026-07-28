@@ -1,22 +1,26 @@
 [
   {
-    "targets": ["203.228.107.184:9187"],
+    "targets": [
+      "host-a.example:9187"
+    ],
     "labels": {
-      "corporation": "HQ",
+      "corporation": "site-a",
       "service": "PostgreSQL",
       "component": "postgresql",
       "category": "platform",
-      "server": "DWServer"
+      "server": "warehouse-01"
     }
   },
   {
-    "targets": ["203.228.101.190:9187"],
+    "targets": [
+      "host-c.example:9187"
+    ],
     "labels": {
-      "corporation": "HQ",
+      "corporation": "site-a",
       "service": "PostgreSQL",
       "component": "postgresql",
       "category": "platform",
       "server": "factorydatawarehouseServer"
     }
   }
-] 
+]

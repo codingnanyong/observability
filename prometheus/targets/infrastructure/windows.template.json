@@ -1,0 +1,26 @@
+[
+  {
+    "targets": [
+      "host-c.example:9182"
+    ],
+    "labels": {
+      "corporation": "site-a",
+      "service": "Windows",
+      "component": "windows_exporter",
+      "category": "infrastructure",
+      "server": "FDW Server"
+    }
+  },
+  {
+    "targets": [
+      "host-d.example:9182"
+    ],
+    "labels": {
+      "corporation": "site-a",
+      "service": "Windows",
+      "component": "windows_exporter",
+      "category": "infrastructure",
+      "server": "MI AppServer"
+    }
+  }
+]

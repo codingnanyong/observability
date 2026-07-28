@@ -1,0 +1,26 @@
+[
+  {
+    "targets": [
+      "host-h.example:9104"
+    ],
+    "labels": {
+      "corporation": "site-b",
+      "service": "MariaDB",
+      "component": "mysqld_exporter",
+      "category": "platform",
+      "server": "windows-01"
+    }
+  },
+  {
+    "targets": [
+      "host-i.example:9104"
+    ],
+    "labels": {
+      "corporation": "site-b",
+      "service": "MariaDB",
+      "component": "mysqld_exporter",
+      "category": "platform",
+      "server": "windows-02"
+    }
+  }
+]

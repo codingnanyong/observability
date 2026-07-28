@@ -1,52 +1,62 @@
 [
   {
-    "targets": ["203.228.107.184:9100"],
+    "targets": [
+      "host-a.example:9100"
+    ],
     "labels": {
-      "corporation": "HQ",
+      "corporation": "site-a",
       "service": "Linux",
       "component": "node_exporter",
       "category": "infrastructure",
-      "server": "DWServer"
+      "server": "warehouse-01"
     }
   },
   {
-    "targets": ["203.228.107.220:9100"],
+    "targets": [
+      "host-b.example:9100"
+    ],
     "labels": {
-      "corporation": "HQ",
+      "corporation": "site-a",
       "service": "Linux",
       "component": "node_exporter",
       "category": "infrastructure",
-      "server": "InfraWatchServer"
+      "server": "monitor-01"
     }
   },
   {
-    "targets": ["10.10.18.177:9100"],
+    "targets": [
+      "host-e.example:9100"
+    ],
     "labels": {
-      "corporation": "JJ",
+      "corporation": "site-b",
       "service": "Linux",
       "component": "node_exporter",
       "category": "infrastructure",
-      "server": "DataCollector"
+      "server": "collector-01"
     }
   },
   {
-    "targets": ["10.10.49.197:9100"],
+    "targets": [
+      "host-f.example:9100"
+    ],
     "labels": {
-      "corporation": "CKP",
+      "corporation": "site-c",
       "service": "Linux",
       "component": "node_exporter",
       "category": "infrastructure",
-      "server": "DataCollector"
+      "server": "collector-01"
     }
   },
   {
-    "targets": ["20.20.17.69:9100"],
+    "targets": [
+      "host-g.example:9100"
+    ],
     "labels": {
-      "corporation": "JJ2",
+      "corporation": "site-d",
       "service": "Linux",
       "component": "node_exporter",
       "category": "infrastructure",
-      "server": "DataCollector"
+      "server": "collector-01"
     }
   }
-] 
+]

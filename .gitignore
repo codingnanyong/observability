@@ -24,6 +24,17 @@ Logs/
 !.env.example
 secrets/
 **/.secrets/
+**/secret.local.env
+**/secret*.env
+!**/secret.example.env
+exporters/postgres-exporter/servicemonitor-docker.yaml
+
+# Prometheus file_sd targets.
+# Commit only *.template.json. Copy to *.json locally (gitignored) and fill hosts.
+prometheus/targets/**/*.json
+!prometheus/targets/**/*.template.json
+!prometheus/targets/README.md
+
 
 # Temporary files
 *.tmp
@@ -96,3 +107,8 @@ exporter_data/
 # Service files
 *.service
 nssm.log
+# Python
+__pycache__/
+*.py[cod]
+*.class
+

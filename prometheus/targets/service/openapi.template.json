@@ -1,12 +1,14 @@
 [
   {
-    "targets": ["203.228.107.184:80"],
+    "targets": [
+      "host-a.example:80"
+    ],
     "labels": {
-      "corporation": "HQ",
+      "corporation": "site-a",
       "service": "OpenAPI",
       "component": "openapi",
       "category": "service",
-      "server": "DWServer"
+      "server": "warehouse-01"
     }
   }
-] 
+]
