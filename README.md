@@ -1,8 +1,8 @@
 # 📊 Enterprise Observability Stack
 
-[![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?logo=prometheus&logoColor=white)](https://prometheus.io/) [![Grafana](https://img.shields.io/badge/Grafana-F46800?logo=grafana&logoColor=white)](https://grafana.com/) [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/) [![AlertManager](https://img.shields.io/badge/AlertManager-E6522C?logo=prometheus&logoColor=white)](https://prometheus.io/docs/alerting/latest/alertmanager/) [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?logo=prometheus&logoColor=white)](https://prometheus.io/) [![Grafana](https://img.shields.io/badge/Grafana-F46800?logo=grafana&logoColor=white)](https://grafana.com/) [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/) [![Helm](https://img.shields.io/badge/Helm-0F1689?logo=helm&logoColor=white)](https://helm.sh/) [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/) [![AlertManager](https://img.shields.io/badge/AlertManager-E6522C?logo=prometheus&logoColor=white)](https://prometheus.io/docs/alerting/latest/alertmanager/) [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Complete observability solution for enterprise infrastructure monitoring with Prometheus metrics collection, Grafana visualization, and comprehensive alerting across multi-platform environments.
+Kubernetes-first observability stack: scrape hosts and platforms with Prometheus, visualize with Grafana Morning dashboards, and deploy the control plane via **Helm** (`kube-prometheus-stack`) plus in-cluster exporters/ServiceMonitors. Docker Compose remains available for standalone exporters and local labs.
 
 ## 🏗️ **Architecture Overview**
 
@@ -12,10 +12,19 @@ Complete observability solution for enterprise infrastructure monitoring with Pr
 ├─────────────────┬─────────────────┬─────────────────────────┤
 │   Infrastructure│    Applications │      Services           │
 │                 │                 │                         │
-│ • Linux Servers │ • Airflow       │ • OpenAPI Services      │
+│ • Linux Servers │ • Airflow       │ • API / OpenAPI         │
 │ • Windows Hosts │ • Databases     │ • Web Applications      │
-│ • windows-app Sites │ • InfluxDB      │ • Custom Exporters  │
+│ • K8s Nodes     │ • Kafka         │ • Custom Exporters      │
 └─────────────────┴─────────────────┴─────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Deployment (Kubernetes + Helm)                 │
+├─────────────────────────────────────────────────────────────┤
+│ • Helm: kube-prometheus-stack (Prometheus / Grafana / AM)   │
+│ • Manifests: base/, exporters/, grafana/configmaps, rules/  │
+│ • Optional Docker Compose for host-side / lab exporters     │
+└─────────────────────────────────────────────────────────────┘
                             │
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
