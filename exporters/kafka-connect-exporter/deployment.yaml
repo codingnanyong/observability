@@ -1,0 +1,202 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-connect-exporter
+  namespace: kafka
+  labels:
+    app.kubernetes.io/name: kafka-connect-exporter
+    app.kubernetes.io/part-of: observability
+data:
+  exporter.py: |
+    #!/usr/bin/env python3
+    """Expose Kafka Connect connector/task health for Prometheus."""
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+    import json
+    import os
+    import urllib.error
+    import urllib.request
+
+    CONNECT = os.environ.get(
+        "CONNECT_URL",
+        "http://kafka-connect-connect-api.kafka.svc:8083",
+    )
+
+    def safe_label(value) -> str | None:
+        """Escape/sanitize a value for Prometheus label text."""
+        s = (
+            str(value)
+            .replace("\\", "\\\\")
+            .replace("\n", "")
+            .replace("\r", "")
+            .replace('"', "")
+        )
+        if not s or len(s) > 200:
+            return None
+        return s
+
+    def scrape():
+        lines = [
+            "# HELP kafka_connect_up 1 if Connect REST API is reachable",
+            "# TYPE kafka_connect_up gauge",
+        ]
+        try:
+            with urllib.request.urlopen(f"{CONNECT}/connectors?expand=status", timeout=10) as resp:
+                data = json.loads(resp.read().decode())
+            lines.append("kafka_connect_up 1")
+            lines.append("# HELP kafka_connect_connector_state 1 if connector worker state matches")
+            lines.append("# TYPE kafka_connect_connector_state gauge")
+            lines.append("# HELP kafka_connect_task_state 1 if task state matches")
+            lines.append("# TYPE kafka_connect_task_state gauge")
+            lines.append("# HELP kafka_connect_connector_running 1 if connector and all tasks RUNNING")
+            lines.append("# TYPE kafka_connect_connector_running gauge")
+            for name, payload in sorted(data.items()):
+                safe_name = safe_label(name)
+                if safe_name is None:
+                    continue
+                status = payload.get("status", {})
+                conn_state = status.get("connector", {}).get("state", "UNKNOWN")
+                for state in ("RUNNING", "FAILED", "PAUSED", "UNASSIGNED", "UNKNOWN"):
+                    val = 1 if conn_state == state else 0
+                    lines.append(
+                        f'kafka_connect_connector_state{{connector="{safe_name}",state="{state}"}} {val}'
+                    )
+                tasks = status.get("tasks", []) or []
+                all_running = conn_state == "RUNNING"
+                for task in tasks:
+                    tid = task.get("id", 0)
+                    tstate = task.get("state", "UNKNOWN")
+                    if tstate != "RUNNING":
+                        all_running = False
+                    for state in ("RUNNING", "FAILED", "PAUSED", "UNASSIGNED", "UNKNOWN"):
+                        val = 1 if tstate == state else 0
+                        lines.append(
+                            f'kafka_connect_task_state{{connector="{safe_name}",task="{tid}",state="{state}"}} {val}'
+                        )
+                lines.append(
+                    f'kafka_connect_connector_running{{connector="{safe_name}"}} {1 if all_running else 0}'
+                )
+        except Exception as exc:  # noqa: BLE001
+            lines.append("kafka_connect_up 0")
+            lines.append(f"# scrape_error {type(exc).__name__}")
+        lines.append("")
+        return "\n".join(lines).encode()
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):  # noqa: N802
+            if self.path not in ("/metrics", "/"):
+                self.send_response(404)
+                self.end_headers()
+                return
+            body = scrape()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, fmt, *args):
+            return
+
+    if __name__ == "__main__":
+        port = int(os.environ.get("PORT", "9404"))
+        HTTPServer(("0.0.0.0", port), Handler).serve_forever()
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-connect-exporter
+  namespace: kafka
+  labels:
+    app.kubernetes.io/name: kafka-connect-exporter
+    app.kubernetes.io/part-of: observability
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kafka-connect-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kafka-connect-exporter
+        app.kubernetes.io/part-of: observability
+    spec:
+      containers:
+        - name: exporter
+          image: python:3.12-slim
+          imagePullPolicy: IfNotPresent
+          command: ["python3", "/app/exporter.py"]
+          env:
+            - name: CONNECT_URL
+              value: http://kafka-connect-connect-api.kafka.svc:8083
+            - name: PORT
+              value: "9404"
+          ports:
+            - name: metrics
+              containerPort: 9404
+          volumeMounts:
+            - name: app
+              mountPath: /app
+              readOnly: true
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 15
+            periodSeconds: 30
+      volumes:
+        - name: app
+          configMap:
+            name: kafka-connect-exporter
+            defaultMode: 0555
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-connect-exporter
+  namespace: kafka
+  labels:
+    app.kubernetes.io/name: kafka-connect-exporter
+    app.kubernetes.io/part-of: observability
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: kafka-connect-exporter
+  ports:
+    - name: metrics
+      port: 9404
+      targetPort: metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kafka-connect-exporter
+  namespace: observability
+  labels:
+    release: kube-prometheus-stack
+    app.kubernetes.io/part-of: observability
+    app.kubernetes.io/name: kafka-connect-exporter
+spec:
+  namespaceSelector:
+    matchNames:
+      - kafka
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kafka-connect-exporter
+  endpoints:
+    - port: metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      path: /metrics

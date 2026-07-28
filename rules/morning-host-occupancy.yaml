@@ -1,0 +1,47 @@
+# Shared host occupancy samples for Morning dashboards (Overview → Hosts → Node).
+# All levels read these records so drill-down shows the same number within an eval interval.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: morning-host-occupancy
+  namespace: observability
+  labels:
+    release: kube-prometheus-stack
+    app.kubernetes.io/name: morning-host-occupancy
+    app.kubernetes.io/part-of: observability
+spec:
+  groups:
+    - name: morning.host.occupancy
+      interval: 15s
+      rules:
+        - record: morning:node_cpu_util:percent
+          expr: |
+            100 - (
+              avg by (instance) (
+                rate(node_cpu_seconds_total{job="node-exporter",mode="idle"}[10m])
+              ) * 100
+            )
+        - record: morning:node_mem_util:percent
+          expr: |
+            (
+              1 - (
+                node_memory_MemAvailable_bytes{job="node-exporter"}
+                / node_memory_MemTotal_bytes{job="node-exporter"}
+              )
+            ) * 100
+        - record: morning:node_disk_root_util:percent
+          expr: |
+            100 - (
+              (
+                node_filesystem_avail_bytes{job="node-exporter",mountpoint="/",fstype!="rootfs"}
+                / node_filesystem_size_bytes{job="node-exporter",mountpoint="/",fstype!="rootfs"}
+              ) * 100
+            )
+        - record: morning:node_disk_media_util:percent
+          expr: |
+            100 - (
+              (
+                node_filesystem_avail_bytes{job="node-exporter",mountpoint="/media"}
+                / node_filesystem_size_bytes{job="node-exporter",mountpoint="/media"}
+              ) * 100
+            )

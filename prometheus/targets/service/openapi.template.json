@@ -1,0 +1,14 @@
+[
+  {
+    "targets": [
+      "host-a.example:80"
+    ],
+    "labels": {
+      "corporation": "site-a",
+      "service": "OpenAPI",
+      "component": "openapi",
+      "category": "service",
+      "server": "warehouse-01"
+    }
+  }
+]

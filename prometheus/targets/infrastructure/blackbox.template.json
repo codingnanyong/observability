@@ -1,0 +1,32 @@
+[
+  {
+    "targets": [
+      "http://host-a.example",
+      "http://host-a.example:80"
+    ],
+    "labels": {
+      "corporation": "site-a",
+      "service": "Blackbox HTTP",
+      "component": "blackbox_exporter",
+      "category": "infrastructure",
+      "server": "warehouse-01",
+      "probe_type": "http_2xx"
+    }
+  },
+  {
+    "targets": [
+      "host-a.example:80",
+      "host-a.example:9100",
+      "host-a.example:9216",
+      "host-a.example:9187"
+    ],
+    "labels": {
+      "corporation": "site-a",
+      "service": "Blackbox TCP",
+      "component": "blackbox_exporter",
+      "category": "infrastructure",
+      "server": "warehouse-01",
+      "probe_type": "tcp_connect"
+    }
+  }
+]
