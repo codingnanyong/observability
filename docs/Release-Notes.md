@@ -1,13 +1,25 @@
-﻿# Release Notes
+﻿# 🏷️ Release Notes
 
 ## v1.0.0
 
-First tagged release (develop → main via #5).
+First tagged release (`develop` → `main` via #5).
 
-**Features:** K8s exporters/base, Morning Grafana hierarchy + generator, host occupancy rules.
+```mermaid
+flowchart LR
+  F[✨ Features] --> S[🔒 Security]
+  S --> D[📚 Docs]
+  F --- F1[K8s + Helm + Morning]
+  S --- S1[No IPs · secrets local]
+  D --- D1[README · Wiki]
+```
 
-**Security:** Target IP scrub → templates; secret/local overlays gitignored; generic service names.
+### ✨ Features
+- ☸️ K8s exporters / base, Morning Grafana hierarchy + generator, host occupancy rules
 
-**Docs:** README badges on one line.
+### 🔒 Security
+- Inventory scrub → generic placeholders; secret/local overlays gitignored
 
-See the [GitHub Release](https://github.com/codingnanyong/observability/releases/tag/v1.0.0) for full notes.
+### 📚 Docs
+- README badges; Wiki + `docs/`
+
+➡️ [GitHub Release v1.0.0](https://github.com/codingnanyong/observability/releases/tag/v1.0.0)

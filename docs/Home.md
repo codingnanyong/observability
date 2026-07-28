@@ -1,18 +1,28 @@
-﻿# Enterprise Observability Stack
+﻿# 🏠 Enterprise Observability Stack
 
-Welcome to the project wiki.
+Welcome to the project wiki — a **Kubernetes + Helm** observability stack built around Prometheus and Grafana.
 
-## Pages
+```mermaid
+flowchart LR
+  T[🎯 Targets] --> E[📡 Exporters]
+  E --> P[🔥 Prometheus]
+  P --> G[📊 Grafana]
+  P --> A[🚨 Alertmanager]
+```
 
-- [[Getting-Started]] — clone, Helm install, first apply
-- [[Architecture]] — stack layers and components
-- [[Kubernetes-Exporters]] — base manifests and exporters
-- [[Morning-Dashboards]] — Grafana hierarchy and generator
-- [[Security-Hygiene]] — what stays out of git
-- [[Release-Notes]] — v1.0.0 summary
+## 📚 Pages
 
-## Quick links
+| Page | What you'll find |
+|------|------------------|
+| [[Getting-Started]] | 🚀 Clone, Helm install, first apply |
+| [[Architecture]] | 🏗️ Stack layers & data flow |
+| [[Kubernetes-Exporters]] | 🧩 `base/` + `exporters/` manifests |
+| [[Morning-Dashboards]] | ☀️ L1–L3 Grafana hierarchy |
+| [[Security-Hygiene]] | 🔒 What stays out of git |
+| [[Release-Notes]] | 🏷️ v1.0.0 summary |
 
-- [Repository](https://github.com/codingnanyong/observability)
-- [Releases](https://github.com/codingnanyong/observability/releases)
-- [Security policy](https://github.com/codingnanyong/observability/blob/main/SECURITY.md)
+## 🔗 Quick links
+
+- [📦 Repository](https://github.com/codingnanyong/observability)
+- [🏷️ Releases](https://github.com/codingnanyong/observability/releases)
+- [🔐 Security policy](https://github.com/codingnanyong/observability/blob/main/SECURITY.md)
