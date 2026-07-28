@@ -1,12 +1,14 @@
 [
   {
-    "targets": ["203.228.107.220:3000"],
+    "targets": [
+      "host-b.example:3000"
+    ],
     "labels": {
-      "corporation": "HQ",
+      "corporation": "site-a",
       "service": "InfraWatch",
       "component": "grafana",
       "category": "observability",
-      "server": "InfraWatchServer"
+      "server": "monitor-01"
     }
   }
-] 
+]

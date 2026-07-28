@@ -1,12 +1,14 @@
 [
   {
-    "targets": ["localhost:9090"],
+    "targets": [
+      "localhost:9090"
+    ],
     "labels": {
-      "corporation": "HQ",
+      "corporation": "site-a",
       "service": "InfraWatch",
       "component": "prometheus",
       "category": "observability",
-      "server": "InfraWatchServer"
+      "server": "monitor-01"
     }
   }
-] 
+]

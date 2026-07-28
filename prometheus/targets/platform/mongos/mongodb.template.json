@@ -1,12 +1,14 @@
 [
   {
-    "targets": ["203.228.107.184:9216"],
+    "targets": [
+      "host-a.example:9216"
+    ],
     "labels": {
-      "corporation": "HQ",
+      "corporation": "site-a",
       "service": "MongoDB",
       "component": "mongodb",
       "category": "platform",
-      "server": "DWServer"
+      "server": "warehouse-01"
     }
   }
-] 
+]

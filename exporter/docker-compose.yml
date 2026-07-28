@@ -27,7 +27,7 @@ services:
     image: prometheuscommunity/postgres-exporter
     container_name: postgres-exporter
     environment:
-      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/postgres?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/postgres?sslmode=require
       - PG_EXPORTER_EXTEND_QUERY_STATS=${PG_EXPORTER_EXTEND_QUERY_STATS}
     ports:
       - "9187:9187"
