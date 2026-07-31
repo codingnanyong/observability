@@ -42,7 +42,7 @@ data:
           "tags": []
         },
         {
-          "title": "이동",
+          "title": "Navigate",
           "type": "dashboards",
           "icon": "dashboard",
           "tags": [
@@ -69,14 +69,14 @@ data:
           },
           "options": {
             "mode": "markdown",
-            "content": "**Observability · 상세** · [← Obs](/d/morning-observability) · [← Status](/d/morning-overview)\n\n① 스택 → ② scrape 건강 → ③ Targets | Obs Pods\n\n클러스터 K8s(Nodes/Bad Pods)는 [Hosts](/d/morning-hosts) 최상단"
+            "content": "**Observability · Detail** · [← Obs](/d/morning-observability) · [← Status](/d/morning-overview)\n\n1 · Stack → 2 · Scrape health → 3 · Targets | Obs Pods\n\nCluster K8s (Nodes/Bad Pods) is at top of [Hosts](/d/morning-hosts)"
           },
           "transparent": false
         },
         {
           "id": 2,
           "type": "row",
-          "title": "① 스택 상태",
+          "title": "1 · Stack status",
           "collapsed": false,
           "gridPos": {
             "h": 1,
@@ -185,7 +185,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "Prometheus scrape/가용 상태."
+          "description": "Prometheus scrape / availability."
         },
         {
           "id": 4,
@@ -286,7 +286,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "Grafana scrape/가용 상태."
+          "description": "Grafana scrape / availability."
         },
         {
           "id": 5,
@@ -387,7 +387,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "Alertmanager scrape/가용 상태."
+          "description": "Alertmanager scrape / availability."
         },
         {
           "id": 6,
@@ -457,12 +457,12 @@ data:
               "valueSize": 36
             }
           },
-          "description": "cadvisor-docker UP 수. 노드 2대면 2가 정상."
+          "description": "cadvisor-docker UP count. Expect 2 for 2 nodes."
         },
         {
           "id": 7,
           "type": "row",
-          "title": "② scrape 건강 (트렌드)",
+          "title": "2 · Scrape health (trends)",
           "collapsed": false,
           "gridPos": {
             "h": 1,
@@ -752,7 +752,7 @@ data:
       },
       "timepicker": {},
       "timezone": "Asia/Seoul",
-      "title": "Morning · Observability 상세",
+      "title": "Morning · Observability detail",
       "uid": "morning-observability-detail",
       "version": 1
     }

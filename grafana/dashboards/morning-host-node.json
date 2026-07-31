@@ -31,7 +31,7 @@
       "tags": []
     },
     {
-      "title": "이동",
+      "title": "Navigate",
       "type": "dashboards",
       "icon": "dashboard",
       "tags": [
@@ -58,14 +58,14 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "**Host · ${node}** · [← Hosts](/d/morning-hosts) · [← Status](/d/morning-overview)\n\n① 점유율 (= Overview recording) → ② 같은 지표 트렌드 → ③ K8s|Docker\n\nSoft 80 · Hard 90 · Node 드롭다운으로 전환"
+        "content": "**Host · ${node}** · [← Hosts](/d/morning-hosts) · [← Status](/d/morning-overview)\n\n1 · Utilization (= Overview recording) → 2 · Same metrics trends → 3 · K8s|Docker\n\nSoft 80 · Hard 90 · switch node via dropdown"
       },
       "transparent": false
     },
     {
       "id": 2,
       "type": "row",
-      "title": "① 점유율",
+      "title": "1 · Utilization",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -445,7 +445,7 @@
     {
       "id": 8,
       "type": "row",
-      "title": "② OS 성능 (지표 · 트렌드)",
+      "title": "2 · OS performance (metrics · trends)",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -972,7 +972,7 @@
     {
       "id": 13,
       "type": "row",
-      "title": "③ 런타임 · Kubernetes (이 노드 Pod)",
+      "title": "3 · Runtime · Kubernetes (Pods on this node)",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -1051,7 +1051,7 @@
           "show": false
         }
       },
-      "description": "이 노드에서 CPU 사용량 상위 Pod."
+      "description": "Top CPU Pods on this node."
     },
     {
       "id": 15,
@@ -1139,7 +1139,7 @@
     {
       "id": 16,
       "type": "row",
-      "title": "③ 런타임 · Docker (이 노드 container)",
+      "title": "3 · Runtime · Docker (containers on this node)",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -1218,7 +1218,7 @@
           "show": false
         }
       },
-      "description": "호스트 Docker(비-K8s) 컨테이너 CPU 상위."
+      "description": "Top CPU Docker (non-K8s) containers on host."
     },
     {
       "id": 18,

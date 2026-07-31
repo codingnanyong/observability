@@ -32,7 +32,7 @@ flowchart LR
 |---------|--------|
 | 📄 Templates | `secret.example.env`, `site_local.example.py` |
 | 🔐 Postgres DSN | `sslmode=require`, password `CHANGE_ME` |
-| 🌐 Exposure | ClusterIP + port-forward / authenticated Ingress |
+| 🌐 Exposure | ClusterIP + port-forward / authenticated Ingress (avoid NodePort on untrusted networks — Prometheus has no auth) |
 | ⎈ Helm | `prometheus/helm-values.yaml` only (no file_sd inventories) |
 
 ## ⚠️ Residual ops risk

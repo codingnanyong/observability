@@ -19,7 +19,7 @@ flowchart LR
 | [[Kubernetes-Exporters]] | 🧩 `base/` + `exporters/` manifests |
 | [[Morning-Dashboards]] | ☀️ L1–L3 Grafana hierarchy |
 | [[Security-Hygiene]] | 🔒 What stays out of git |
-| [[Release-Notes]] | 🏷️ v1.0.0 summary |
+| [[Release-Notes]] | 🏷️ v1.1.0 summary |
 
 ## 🔗 Quick links
 

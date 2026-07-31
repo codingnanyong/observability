@@ -30,7 +30,7 @@ data:
           "tags": []
         },
         {
-          "title": "이동",
+          "title": "Navigate",
           "type": "dashboards",
           "icon": "dashboard",
           "tags": [
@@ -57,14 +57,14 @@ data:
           },
           "options": {
             "mode": "markdown",
-            "content": "**APIs** · [← Status](/d/morning-overview) · [portal](/d/morning-api-svc?var-job=api-portal) · [core](/d/morning-api-svc?var-job=api-core)\n\n클릭 → EP/성능"
+            "content": "**APIs** · [← Status](/d/morning-overview) · [portal](/d/morning-api-svc?var-job=api-portal) · [core](/d/morning-api-svc?var-job=api-core)\n\nClick → endpoints/performance"
           },
           "transparent": false
         },
         {
           "id": 2,
           "type": "row",
-          "title": "서비스 (클릭 → EP 상세)",
+          "title": "Services (click → endpoint detail)",
           "collapsed": false,
           "gridPos": {
             "h": 1,
@@ -255,7 +255,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "가용 replica 수. 1 이상이면 정상."
+          "description": "Available replica count. OK if ≥1."
         },
         {
           "id": 5,
@@ -438,7 +438,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "가용 replica 수. 1 이상이면 정상."
+          "description": "Available replica count. OK if ≥1."
         }
       ],
       "refresh": "30s",

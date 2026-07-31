@@ -30,7 +30,7 @@ data:
           "tags": []
         },
         {
-          "title": "이동",
+          "title": "Navigate",
           "type": "dashboards",
           "icon": "dashboard",
           "tags": [
@@ -57,14 +57,14 @@ data:
           },
           "options": {
             "mode": "markdown",
-            "content": "**Hosts** · [← Status](/d/morning-overview) · [K8s](/d/morning-k8s) · [worker-01](/d/morning-host-node?var-node=worker-01) · [worker-02](/d/morning-host-node?var-node=worker-02)\n\n① **K8s 클러스터** → ② Host 점유율 → 클릭 시 OS · Pod · Docker · Soft 80 · Hard 90"
+            "content": "**Hosts** · [← Status](/d/morning-overview) · [K8s](/d/morning-k8s) · [worker-01](/d/morning-host-node?var-node=worker-01) · [worker-02](/d/morning-host-node?var-node=worker-02)\n\n1 · **K8s cluster** → 2 · Host utilization → click for OS · Pod · Docker · Soft 80 · Hard 90"
           },
           "transparent": false
         },
         {
           "id": 2,
           "type": "row",
-          "title": "K8s 클러스터 · 클릭 → 상세 (legacy)",
+          "title": "K8s cluster · click → detail (legacy)",
           "collapsed": false,
           "gridPos": {
             "h": 1,
@@ -122,7 +122,7 @@ data:
               "mappings": [],
               "links": [
                 {
-                  "title": "K8s 상세",
+                  "title": "K8s detail",
                   "url": "/d/morning-k8s",
                   "targetBlank": false,
                   "keepTime": true
@@ -149,7 +149,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "Ready=True 노드 수. 경고 <1 · 정상 ≥2"
+          "description": "Ready=True node count. Warn <1 · OK ≥2"
         },
         {
           "id": 4,
@@ -199,7 +199,7 @@ data:
               "mappings": [],
               "links": [
                 {
-                  "title": "K8s 상세",
+                  "title": "K8s detail",
                   "url": "/d/morning-k8s",
                   "targetBlank": false,
                   "keepTime": true
@@ -225,12 +225,12 @@ data:
               "valueSize": 36
             }
           },
-          "description": "Ready=False 노드 수. Soft ≥1 · Hard ≥2"
+          "description": "Ready=False node count. Soft ≥1 · Hard ≥2"
         },
         {
           "id": 5,
           "type": "stat",
-          "title": "Bad Pods",
+          "title": "CrashLoop / ImagePull",
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -243,7 +243,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum((kube_pod_status_phase{namespace=~\"kafka|airflow|postgres|observability|data|api-core|api-portal\",phase=~\"Failed|Unknown\"} == 1)) or vector(0)",
+              "expr": "(sum(kube_pod_container_status_waiting_reason{namespace=~\"kafka|airflow|postgres|observability|data|api-core|api-portal\",reason=~\"CrashLoopBackOff|ImagePullBackOff|ErrImagePull|CreateContainerConfigError|InvalidImageName\"} == 1) or vector(0))",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -275,7 +275,7 @@ data:
               "mappings": [],
               "links": [
                 {
-                  "title": "K8s 상세",
+                  "title": "K8s detail",
                   "url": "/d/morning-k8s",
                   "targetBlank": false,
                   "keepTime": true
@@ -301,7 +301,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "Failed/Unknown phase Pod 수. Soft ≥1 · Hard ≥3"
+          "description": "CrashLoopBackOff|ImagePull*. Soft≥1 Hard≥3. Ignores Airflow Failed task pods."
         },
         {
           "id": 6,
@@ -351,7 +351,7 @@ data:
               "mappings": [],
               "links": [
                 {
-                  "title": "K8s 상세",
+                  "title": "K8s detail",
                   "url": "/d/morning-k8s",
                   "targetBlank": false,
                   "keepTime": true
@@ -377,12 +377,12 @@ data:
               "valueSize": 36
             }
           },
-          "description": "unavailable replica 합. Soft ≥1 · Hard ≥3"
+          "description": "Sum of unavailable replicas. Soft ≥1 · Hard ≥3"
         },
         {
           "id": 7,
           "type": "row",
-          "title": "worker-01 · 클릭 → OS / Pod / Docker",
+          "title": "worker-01 · click → OS / Pod / Docker",
           "collapsed": false,
           "gridPos": {
             "h": 1,
@@ -498,7 +498,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "worker-01 노드 Ready 조건."
+          "description": "worker-01 node Ready condition."
         },
         {
           "id": 9,
@@ -811,7 +811,7 @@ data:
         {
           "id": 13,
           "type": "row",
-          "title": "worker-02 · 클릭 → OS / Pod / Docker",
+          "title": "worker-02 · click → OS / Pod / Docker",
           "collapsed": false,
           "gridPos": {
             "h": 1,
@@ -927,7 +927,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "worker-02 노드 Ready 조건."
+          "description": "worker-02 node Ready condition."
         },
         {
           "id": 15,

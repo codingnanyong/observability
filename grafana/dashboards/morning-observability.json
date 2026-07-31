@@ -19,7 +19,7 @@
       "tags": []
     },
     {
-      "title": "이동",
+      "title": "Navigate",
       "type": "dashboards",
       "icon": "dashboard",
       "tags": [
@@ -46,14 +46,14 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "**Observability** · [← Status](/d/morning-overview) · [상세](/d/morning-observability-detail) · [Hosts · K8s](/d/morning-hosts)\n\n스택 UP · 클릭 → scrape/pods · 클러스터 K8s는 Hosts 최상단"
+        "content": "**Observability** · [← Status](/d/morning-overview) · [Detail](/d/morning-observability-detail) · [Hosts · K8s](/d/morning-hosts)\n\nStack UP · click → scrape/pods · cluster K8s is at top of Hosts"
       },
       "transparent": false
     },
     {
       "id": 2,
       "type": "row",
-      "title": "스택 (클릭 → 상세)",
+      "title": "Stack (click → detail)",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -169,7 +169,7 @@
           "valueSize": 36
         }
       },
-      "description": "Prometheus scrape/가용 상태."
+      "description": "Prometheus scrape / availability."
     },
     {
       "id": 4,
@@ -277,7 +277,7 @@
           "valueSize": 36
         }
       },
-      "description": "Grafana scrape/가용 상태."
+      "description": "Grafana scrape / availability."
     },
     {
       "id": 5,
@@ -385,7 +385,7 @@
           "valueSize": 36
         }
       },
-      "description": "Alertmanager scrape/가용 상태."
+      "description": "Alertmanager scrape / availability."
     },
     {
       "id": 6,
@@ -462,7 +462,7 @@
           "valueSize": 36
         }
       },
-      "description": "node-exporter UP 수. 노드 2대면 2가 정상."
+      "description": "node-exporter UP count. Expect 2 for 2 nodes."
     }
   ],
   "refresh": "30s",
