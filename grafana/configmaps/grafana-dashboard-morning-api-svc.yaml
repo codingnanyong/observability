@@ -42,7 +42,7 @@ data:
           "tags": []
         },
         {
-          "title": "이동",
+          "title": "Navigate",
           "type": "dashboards",
           "icon": "dashboard",
           "tags": [
@@ -69,14 +69,14 @@ data:
           },
           "options": {
             "mode": "markdown",
-            "content": "**API · ${job}** · [← APIs](/d/morning-apis) · [← Status](/d/morning-overview)\n\n① 상태 → ② Error/RPS/p95 → ③ Endpoints\n\nError Soft 1% · Hard 5%"
+            "content": "**API · ${job}** · [← APIs](/d/morning-apis) · [← Status](/d/morning-overview)\n\n1 · Status → 2 · Error/RPS/p95 → 3 · Endpoints\n\nError Soft 1% · Hard 5%"
           },
           "transparent": false
         },
         {
           "id": 2,
           "type": "row",
-          "title": "① 상태",
+          "title": "1 · Status",
           "collapsed": false,
           "gridPos": {
             "h": 1,
@@ -317,7 +317,7 @@ data:
         {
           "id": 6,
           "type": "row",
-          "title": "② 성능 (트렌드)",
+          "title": "2 · Performance trends",
           "collapsed": false,
           "gridPos": {
             "h": 1,

@@ -18,21 +18,9 @@ data:
       "id": null,
       "links": [
         {
-          "title": "← Pipe",
+          "title": "← Status",
           "type": "link",
           "icon": "doc",
-          "url": "/d/morning-datapipeline",
-          "tooltip": "← Pipe",
-          "targetBlank": false,
-          "keepTime": true,
-          "asDropdown": false,
-          "includeVars": false,
-          "tags": []
-        },
-        {
-          "title": "Status",
-          "type": "link",
-          "icon": "info",
           "url": "/d/morning-overview",
           "tooltip": "Morning Status",
           "targetBlank": false,
@@ -42,7 +30,19 @@ data:
           "tags": []
         },
         {
-          "title": "이동",
+          "title": "← Pipe",
+          "type": "link",
+          "icon": "doc",
+          "url": "/d/morning-datapipeline",
+          "tooltip": "Data Pipeline",
+          "targetBlank": false,
+          "keepTime": true,
+          "asDropdown": false,
+          "includeVars": false,
+          "tags": []
+        },
+        {
+          "title": "Navigate",
           "type": "dashboards",
           "icon": "dashboard",
           "tags": [
@@ -62,27 +62,27 @@ data:
           "type": "text",
           "title": "",
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 24,
             "x": 0,
             "y": 0
           },
           "options": {
             "mode": "markdown",
-            "content": "**Kafka** · [← DataPipeline](/d/morning-datapipeline) · [← Status](/d/morning-overview)\n\n① 상태 → ② 트렌드 → ③ Broker | Connect | CTM\n\nCTM Soft 150k · Hard 500k"
+            "content": "**Kafka** · [← Data Pipeline](/d/morning-datapipeline) · [← Status](/d/morning-overview)\n\n① Platform → ② Freshness / Ingest lag → ③ Consumer lag → ④ Components\n\nCTM Soft **120s** / Hard **600s** · BANB Soft on **ingest lag** · Lag Soft **300k** / Hard **500k**"
           },
           "transparent": false
         },
         {
           "id": 2,
           "type": "row",
-          "title": "① 상태",
+          "title": "1 · Platform",
           "collapsed": false,
           "gridPos": {
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 4
+            "y": 3
           },
           "panels": []
         },
@@ -90,11 +90,12 @@ data:
           "id": 3,
           "type": "stat",
           "title": "Brokers",
+          "description": "Ready brokers (≥3)",
           "gridPos": {
             "h": 4,
             "w": 6,
             "x": 0,
-            "y": 5
+            "y": 4
           },
           "datasource": {
             "type": "prometheus",
@@ -102,7 +103,7 @@ data:
           },
           "targets": [
             {
-              "expr": "count(kube_pod_status_ready{namespace=\"kafka\",pod=~\"kafka-cluster-combined-.*\",condition=\"true\"}==1) or vector(0)",
+              "expr": "count(kube_pod_status_ready{namespace=\"kafka\",pod=~\"kafka-cluster-combined-.*\",condition=\"true\"}==1)",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -113,7 +114,7 @@ data:
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "min": 0,
+              "noValue": "—",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -131,8 +132,7 @@ data:
                   }
                 ]
               },
-              "mappings": [],
-              "links": []
+              "mappings": []
             },
             "overrides": []
           },
@@ -150,20 +150,20 @@ data:
             "textMode": "value",
             "text": {
               "titleSize": 13,
-              "valueSize": 36
+              "valueSize": 28
             }
-          },
-          "description": "Ready broker Pod 수. 경고 <2 · 정상 ≥3"
+          }
         },
         {
           "id": 4,
           "type": "stat",
           "title": "Workers",
+          "description": "Connect workers Ready (≥2)",
           "gridPos": {
             "h": 4,
             "w": 6,
             "x": 6,
-            "y": 5
+            "y": 4
           },
           "datasource": {
             "type": "prometheus",
@@ -171,7 +171,7 @@ data:
           },
           "targets": [
             {
-              "expr": "count(kube_pod_status_ready{namespace=\"kafka\",pod=~\"kafka-connect-connect-.*\",condition=\"true\"}==1) or vector(0)",
+              "expr": "count(kube_pod_status_ready{namespace=\"kafka\",pod=~\"kafka-connect-connect-.*\",condition=\"true\"}==1)",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -182,7 +182,7 @@ data:
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "min": 0,
+              "noValue": "—",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -200,8 +200,7 @@ data:
                   }
                 ]
               },
-              "mappings": [],
-              "links": []
+              "mappings": []
             },
             "overrides": []
           },
@@ -219,20 +218,20 @@ data:
             "textMode": "value",
             "text": {
               "titleSize": 13,
-              "valueSize": 36
+              "valueSize": 28
             }
-          },
-          "description": "Connect worker Ready 수. 경고 <1 · 정상 ≥2"
+          }
         },
         {
           "id": 5,
           "type": "stat",
-          "title": "Broken",
+          "title": "Broken connectors",
+          "description": "Not Running. Soft≥1 Hard≥2",
           "gridPos": {
             "h": 4,
             "w": 6,
             "x": 12,
-            "y": 5
+            "y": 4
           },
           "datasource": {
             "type": "prometheus",
@@ -240,7 +239,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(kafka_connect_connector_running == bool 0) or vector(0)",
+              "expr": "sum(kafka_connect_connector_running == bool 0)",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -251,7 +250,7 @@ data:
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "min": 0,
+              "noValue": "—",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -270,7 +269,7 @@ data:
                 ]
               },
               "mappings": [],
-              "links": []
+              "min": 0
             },
             "overrides": []
           },
@@ -288,20 +287,20 @@ data:
             "textMode": "value",
             "text": {
               "titleSize": 13,
-              "valueSize": 36
+              "valueSize": 28
             }
-          },
-          "description": "Running이 아닌 connector 수. Soft ≥1 · Hard ≥2"
+          }
         },
         {
           "id": 6,
           "type": "stat",
-          "title": "CTM Lag",
+          "title": "FAILED tasks",
+          "description": "FAILED Connect tasks",
           "gridPos": {
             "h": 4,
             "w": 6,
             "x": 18,
-            "y": 5
+            "y": 4
           },
           "datasource": {
             "type": "prometheus",
@@ -309,7 +308,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"}) or vector(0)",
+              "expr": "sum(kafka_connect_task_state{state=\"FAILED\"}) or vector(0)",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -320,7 +319,7 @@ data:
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "min": 0,
+              "noValue": "—",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -330,7 +329,516 @@ data:
                   },
                   {
                     "color": "orange",
-                    "value": 150000
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "mappings": [],
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 28
+            }
+          }
+        },
+        {
+          "id": 10,
+          "type": "row",
+          "title": "2 · Freshness / Ingest lag — CTM · BANB",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 8
+          },
+          "panels": []
+        },
+        {
+          "id": 11,
+          "type": "stat",
+          "title": "CTM freshness",
+          "description": "measurement Soft≥120 Hard≥600",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 9
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(ctm_bronze_freshness_lag_seconds{stream=\"measurement\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "decimals": 1,
+              "noValue": "—",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 120
+                  },
+                  {
+                    "color": "red",
+                    "value": 600
+                  }
+                ]
+              },
+              "mappings": [],
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 28
+            }
+          }
+        },
+        {
+          "id": 12,
+          "type": "stat",
+          "title": "BANB ingest lag",
+          "description": "etl_ingest_time — Soft parent",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 9
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(banb_bronze_freshness_lag_seconds{stream=\"env_temperature_ingest\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "decimals": 1,
+              "noValue": "—",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 120
+                  },
+                  {
+                    "color": "red",
+                    "value": 600
+                  }
+                ]
+              },
+              "mappings": [],
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 28
+            }
+          }
+        },
+        {
+          "id": 13,
+          "type": "stat",
+          "title": "CTM sensor_status",
+          "description": "sensor_status_history freshness — secondary stream (not Soft/Hard parent).",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 9
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(ctm_bronze_freshness_lag_seconds{stream=\"sensor_status\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "decimals": 1,
+              "noValue": "—",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              },
+              "mappings": [],
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 28
+            }
+          }
+        },
+        {
+          "id": 14,
+          "type": "stat",
+          "title": "BANB event lag",
+          "description": "capture_dt incl. clock skew — reference",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 9
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(banb_bronze_freshness_lag_seconds{stream=\"env_temperature\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "decimals": 0,
+              "noValue": "—",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              },
+              "mappings": [],
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 28
+            }
+          }
+        },
+        {
+          "id": 15,
+          "type": "timeseries",
+          "title": "CTM freshness trend",
+          "description": "Event time vs now. Soft 120 / Hard 600",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 13
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(ctm_bronze_freshness_lag_seconds{stream=\"measurement\"})",
+              "legendFormat": "measurement",
+              "refId": "A",
+              "instant": false,
+              "range": true
+            },
+            {
+              "expr": "max(ctm_bronze_freshness_lag_seconds{stream=\"sensor_status\"})",
+              "legendFormat": "sensor_status",
+              "refId": "B",
+              "instant": false,
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 12,
+                "showPoints": "never",
+                "spanNulls": true
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 120
+                  },
+                  {
+                    "color": "red",
+                    "value": 600
+                  }
+                ]
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 16,
+          "type": "timeseries",
+          "title": "BANB ingest vs event lag",
+          "description": "Ingest = Soft/Hard · Event includes clock skew",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 13
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(banb_bronze_freshness_lag_seconds{stream=\"env_temperature_ingest\"})",
+              "legendFormat": "ingest (Soft)",
+              "refId": "A",
+              "instant": false,
+              "range": true
+            },
+            {
+              "expr": "max(banb_bronze_freshness_lag_seconds{stream=\"env_temperature\"})",
+              "legendFormat": "event (skew)",
+              "refId": "B",
+              "instant": false,
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 12,
+                "showPoints": "never",
+                "spanNulls": true
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 120
+                  },
+                  {
+                    "color": "red",
+                    "value": 600
+                  }
+                ]
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 20,
+          "type": "row",
+          "title": "3 · Consumer lag — backlog not yet sunk",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 21
+          },
+          "panels": []
+        },
+        {
+          "id": 21,
+          "type": "stat",
+          "title": "CTM consumer lag",
+          "description": "Soft≥300k Hard≥500k",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 22
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "noValue": "—",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 300000
                   },
                   {
                     "color": "red",
@@ -339,7 +847,7 @@ data:
                 ]
               },
               "mappings": [],
-              "links": []
+              "min": 0
             },
             "overrides": []
           },
@@ -357,33 +865,20 @@ data:
             "textMode": "value",
             "text": {
               "titleSize": 13,
-              "valueSize": 36
+              "valueSize": 28
             }
-          },
-          "description": "CTM sink consumergroup lag 합. Soft ≥150000 · Hard ≥500000"
+          }
         },
         {
-          "id": 7,
-          "type": "row",
-          "title": "② 성능 (트렌드)",
-          "collapsed": false,
+          "id": 22,
+          "type": "stat",
+          "title": "BANB consumer lag",
+          "description": "Soft≥300k Hard≥500k",
           "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 9
-          },
-          "panels": []
-        },
-        {
-          "id": 8,
-          "type": "timeseries",
-          "title": "CTM Lag",
-          "gridPos": {
-            "h": 7,
-            "w": 12,
-            "x": 0,
-            "y": 10
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 22
           },
           "datasource": {
             "type": "prometheus",
@@ -391,123 +886,68 @@ data:
           },
           "targets": [
             {
-              "expr": "sum by (consumergroup) (kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"})",
+              "expr": "sum(kafka_consumergroup_lag{consumergroup=~\"connect-banb-.*\"})",
               "refId": "A",
-              "legendFormat": "{{consumergroup}}"
-            },
-            {
-              "expr": "vector(150000)",
-              "refId": "SOFT",
-              "legendFormat": "Soft"
-            },
-            {
-              "expr": "vector(500000)",
-              "refId": "HARD",
-              "legendFormat": "Hard"
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
             }
           ],
           "fieldConfig": {
             "defaults": {
               "unit": "short",
-              "min": 0,
-              "custom": {
-                "lineWidth": 2,
-                "fillOpacity": 15,
-                "spanNulls": true,
-                "showPoints": "never"
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Soft"
-                },
-                "properties": [
+              "decimals": 0,
+              "noValue": "—",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
                   {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "orange"
-                    }
+                    "color": "green",
+                    "value": null
                   },
                   {
-                    "id": "custom.lineStyle",
-                    "value": {
-                      "fill": "dash",
-                      "dash": [
-                        10,
-                        5
-                      ]
-                    }
+                    "color": "orange",
+                    "value": 300000
                   },
                   {
-                    "id": "custom.fillOpacity",
-                    "value": 0
-                  },
-                  {
-                    "id": "custom.lineWidth",
-                    "value": 2
+                    "color": "red",
+                    "value": 500000
                   }
                 ]
               },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Hard"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "red"
-                    }
-                  },
-                  {
-                    "id": "custom.lineStyle",
-                    "value": {
-                      "fill": "dash",
-                      "dash": [
-                        10,
-                        5
-                      ]
-                    }
-                  },
-                  {
-                    "id": "custom.fillOpacity",
-                    "value": 0
-                  },
-                  {
-                    "id": "custom.lineWidth",
-                    "value": 2
-                  }
-                ]
-              }
-            ]
+              "mappings": [],
+              "min": 0
+            },
+            "overrides": []
           },
           "options": {
-            "legend": {
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
             },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 28
             }
-          },
-          "description": "Soft ≥150000 · Hard ≥500000"
+          }
         },
         {
-          "id": 9,
-          "type": "timeseries",
-          "title": "Connect restarts / task failed",
+          "id": 23,
+          "type": "stat",
+          "title": "CTM produce−consume gap",
+          "description": "msgs/s growing lag if >0",
           "gridPos": {
-            "h": 7,
-            "w": 12,
+            "h": 4,
+            "w": 6,
             "x": 12,
-            "y": 10
+            "y": 22
           },
           "datasource": {
             "type": "prometheus",
@@ -515,95 +955,190 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"kafka\",pod=~\"kafka-connect-.*\"}[1h])) or vector(0)",
+              "expr": "(sum(rate(kafka_topic_partition_current_offset{topic=\"ctm.edge.core.measurement\"}[5m])) - sum(rate(kafka_consumergroup_current_offset{consumergroup=\"connect-ctm-sink-measurement-v1\"}[5m])))",
               "refId": "A",
-              "legendFormat": "restarts 1h"
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ops",
+              "decimals": 0,
+              "noValue": "—",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 200
+                  },
+                  {
+                    "color": "red",
+                    "value": 800
+                  }
+                ]
+              },
+              "mappings": []
             },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 28
+            }
+          }
+        },
+        {
+          "id": 24,
+          "type": "stat",
+          "title": "Total Connect lag",
+          "description": "All connect-* lag sum",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 22
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
             {
-              "expr": "sum(kafka_connect_connector_task_status{status=\"FAILED\"}) or vector(0)",
-              "refId": "B",
-              "legendFormat": "tasks FAILED"
+              "expr": "sum(kafka_consumergroup_lag{consumergroup=~\"connect-.*\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
             }
           ],
           "fieldConfig": {
             "defaults": {
               "unit": "short",
-              "min": 0,
-              "custom": {
-                "lineWidth": 2,
-                "fillOpacity": 15,
-                "spanNulls": true,
-                "showPoints": "never"
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Soft"
-                },
-                "properties": [
+              "decimals": 0,
+              "noValue": "—",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
                   {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "orange"
-                    }
+                    "color": "green",
+                    "value": null
                   },
                   {
-                    "id": "custom.lineStyle",
-                    "value": {
-                      "fill": "dash",
-                      "dash": [
-                        10,
-                        5
-                      ]
-                    }
+                    "color": "orange",
+                    "value": 300000
                   },
                   {
-                    "id": "custom.fillOpacity",
-                    "value": 0
-                  },
-                  {
-                    "id": "custom.lineWidth",
-                    "value": 2
+                    "color": "red",
+                    "value": 500000
                   }
                 ]
               },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Hard"
-                },
-                "properties": [
+              "mappings": [],
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 28
+            }
+          }
+        },
+        {
+          "id": 25,
+          "type": "timeseries",
+          "title": "CTM sink lag trend",
+          "description": "Soft 300k / Hard 500k",
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 26
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"})",
+              "legendFormat": "CTM sinks",
+              "refId": "A",
+              "instant": false,
+              "range": true
+            },
+            {
+              "expr": "sum(kafka_consumergroup_lag{consumergroup=\"connect-ctm-sink-measurement-v1\"})",
+              "legendFormat": "measurement",
+              "refId": "B",
+              "instant": false,
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 15,
+                "showPoints": "never",
+                "spanNulls": true
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
                   {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "red"
-                    }
+                    "color": "green",
+                    "value": null
                   },
                   {
-                    "id": "custom.lineStyle",
-                    "value": {
-                      "fill": "dash",
-                      "dash": [
-                        10,
-                        5
-                      ]
-                    }
+                    "color": "orange",
+                    "value": 300000
                   },
                   {
-                    "id": "custom.fillOpacity",
-                    "value": 0
-                  },
-                  {
-                    "id": "custom.lineWidth",
-                    "value": 2
+                    "color": "red",
+                    "value": 500000
                   }
                 ]
-              }
-            ]
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "min": 0
+            },
+            "overrides": []
           },
           "options": {
             "legend": {
@@ -618,27 +1153,15 @@ data:
           }
         },
         {
-          "id": 10,
-          "type": "row",
-          "title": "③ 구성요소 (형제)",
-          "collapsed": false,
+          "id": 26,
+          "type": "timeseries",
+          "title": "BANB sink lag trend",
+          "description": "banb + banb_env sinks",
           "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 17
-          },
-          "panels": []
-        },
-        {
-          "id": 11,
-          "type": "table",
-          "title": "Brokers",
-          "gridPos": {
-            "h": 10,
+            "h": 8,
             "w": 8,
-            "x": 0,
-            "y": 18
+            "x": 8,
+            "y": 26
           },
           "datasource": {
             "type": "prometheus",
@@ -646,49 +1169,188 @@ data:
           },
           "targets": [
             {
+              "expr": "sum(kafka_consumergroup_lag{consumergroup=~\"connect-banb-.*\"})",
+              "legendFormat": "BANB sinks",
               "refId": "A",
-              "expr": "max by (pod, phase) (kube_pod_status_phase{namespace=\"kafka\",pod=~\"kafka-cluster-combined-.*\"} == 1)",
-              "format": "table",
-              "instant": true
+              "instant": false,
+              "range": true
             }
           ],
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "__name__": true
-                },
-                "renameByName": {
-                  "pod": "Broker",
-                  "phase": "Phase",
-                  "Value": "V"
-                },
-                "indexByName": {
-                  "Broker": 0,
-                  "Phase": 1,
-                  "V": 2
-                }
-              }
-            },
-            {
-              "id": "sortBy",
-              "options": {
-                "sort": [
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 15,
+                "showPoints": "never",
+                "spanNulls": true
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
                   {
-                    "field": "Broker",
-                    "desc": true
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 300000
+                  },
+                  {
+                    "color": "red",
+                    "value": 500000
                   }
                 ]
-              }
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 27,
+          "type": "timeseries",
+          "title": "Connect health",
+          "description": "Connectors / FAILED tasks",
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 26
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum(kafka_connect_connector_running)",
+              "legendFormat": "running",
+              "refId": "A",
+              "instant": false,
+              "range": true
+            },
+            {
+              "expr": "sum(kafka_connect_connector_running == bool 0)",
+              "legendFormat": "not_running",
+              "refId": "B",
+              "instant": false,
+              "range": true
+            },
+            {
+              "expr": "sum(kafka_connect_task_state{state=\"FAILED\"}) or vector(0)",
+              "legendFormat": "failed_tasks",
+              "refId": "C",
+              "instant": false,
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 12,
+                "showPoints": "never",
+                "spanNulls": true
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 30,
+          "type": "row",
+          "title": "4 · Components",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 34
+          },
+          "panels": []
+        },
+        {
+          "id": 31,
+          "type": "table",
+          "title": "Brokers",
+          "description": "kafka broker pods",
+          "gridPos": {
+            "h": 10,
+            "w": 6,
+            "x": 0,
+            "y": 35
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "kube_pod_status_ready{namespace=\"kafka\",pod=~\"kafka-cluster-combined-.*\",condition=\"true\"}",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant",
+              "format": "table"
             }
           ],
           "fieldConfig": {
             "defaults": {
               "custom": {
-                "align": "left"
-              }
+                "align": "auto",
+                "filterable": true
+              },
+              "mappings": []
             },
             "overrides": []
           },
@@ -699,17 +1361,40 @@ data:
               "show": false
             }
           },
-          "description": "kafka broker Pod phase."
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "job": true,
+                  "instance": true,
+                  "namespace": true,
+                  "uid": true,
+                  "condition": true,
+                  "container": true,
+                  "endpoint": true,
+                  "service": true
+                },
+                "renameByName": {
+                  "pod": "Pod",
+                  "Value": "Ready"
+                }
+              }
+            }
+          ]
         },
         {
-          "id": 12,
+          "id": 32,
           "type": "table",
-          "title": "Connect · connectors",
+          "title": "Connectors",
+          "description": "Connector running state",
           "gridPos": {
             "h": 10,
-            "w": 8,
-            "x": 8,
-            "y": 18
+            "w": 9,
+            "x": 6,
+            "y": 35
           },
           "datasource": {
             "type": "prometheus",
@@ -717,51 +1402,156 @@ data:
           },
           "targets": [
             {
+              "expr": "kafka_connect_connector_running",
               "refId": "A",
-              "expr": "sum by (connector, state) (kafka_connect_connector_state == 1)",
-              "format": "table",
-              "instant": true
+              "instant": true,
+              "range": false,
+              "queryType": "instant",
+              "format": "table"
             }
           ],
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "filterable": true
+              },
+              "mappings": []
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "0": {
+                            "text": "DOWN",
+                            "color": "red"
+                          },
+                          "1": {
+                            "text": "UP",
+                            "color": "green"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.displayMode",
+                    "value": "color-text"
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false
+            }
+          },
           "transformations": [
             {
               "id": "organize",
               "options": {
                 "excludeByName": {
                   "Time": true,
-                  "__name__": true
+                  "__name__": true,
+                  "job": true,
+                  "instance": true,
+                  "namespace": true,
+                  "container": true,
+                  "endpoint": true,
+                  "service": true,
+                  "pod": true
                 },
                 "renameByName": {
                   "connector": "Connector",
-                  "state": "State",
-                  "Value": "Active"
-                },
-                "indexByName": {
-                  "Connector": 0,
-                  "State": 1,
-                  "Active": 2
+                  "Value": "Value"
                 }
               }
-            },
+            }
+          ]
+        },
+        {
+          "id": 33,
+          "type": "table",
+          "title": "Sink consumer lag",
+          "description": "Per consumergroup backlog",
+          "gridPos": {
+            "h": 10,
+            "w": 9,
+            "x": 15,
+            "y": 35
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
             {
-              "id": "sortBy",
-              "options": {
-                "sort": [
-                  {
-                    "field": "Connector",
-                    "desc": true
-                  }
-                ]
-              }
+              "expr": "sum by (consumergroup) (kafka_consumergroup_lag{consumergroup=~\"connect-(ctm|banb).*\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant",
+              "format": "table"
             }
           ],
           "fieldConfig": {
             "defaults": {
               "custom": {
-                "align": "left"
-              }
+                "align": "auto",
+                "filterable": true
+              },
+              "mappings": []
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.displayMode",
+                    "value": "color-background"
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green",
+                          "value": null
+                        },
+                        {
+                          "color": "orange",
+                          "value": 300000
+                        },
+                        {
+                          "color": "red",
+                          "value": 500000
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  }
+                ]
+              }
+            ]
           },
           "options": {
             "showHeader": true,
@@ -770,30 +1560,6 @@ data:
               "show": false
             }
           },
-          "description": "현재 활성 state=1 인 connector만 표시."
-        },
-        {
-          "id": 13,
-          "type": "table",
-          "title": "CTM · consumergroup lag",
-          "gridPos": {
-            "h": 10,
-            "w": 8,
-            "x": 16,
-            "y": 18
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "expr": "sum by (consumergroup) (kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"})",
-              "format": "table",
-              "instant": true
-            }
-          ],
           "transformations": [
             {
               "id": "organize",
@@ -803,12 +1569,8 @@ data:
                   "__name__": true
                 },
                 "renameByName": {
-                  "consumergroup": "Group",
-                  "Value": "Lag"
-                },
-                "indexByName": {
-                  "Group": 0,
-                  "Lag": 1
+                  "consumergroup": "Consumer group",
+                  "Value": "Value"
                 }
               }
             },
@@ -817,36 +1579,20 @@ data:
               "options": {
                 "sort": [
                   {
-                    "field": "Lag",
+                    "field": "Value",
                     "desc": true
                   }
                 ]
               }
             }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "left"
-              }
-            },
-            "overrides": []
-          },
-          "options": {
-            "showHeader": true,
-            "cellHeight": "sm",
-            "footer": {
-              "show": false
-            }
-          }
+          ]
         }
       ],
-      "refresh": "30s",
       "schemaVersion": 39,
       "tags": [
         "morning",
-        "kafka",
-        "datapipeline"
+        "morning-nav",
+        "kafka"
       ],
       "templating": {
         "list": []
@@ -856,8 +1602,9 @@ data:
         "to": "now"
       },
       "timepicker": {},
-      "timezone": "Asia/Seoul",
+      "timezone": "browser",
       "title": "Morning · Kafka",
       "uid": "morning-kafka-perf",
-      "version": 1
+      "version": 1,
+      "refresh": "30s"
     }

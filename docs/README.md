@@ -20,6 +20,6 @@ mindmap
 | [🧩 Kubernetes Exporters](Kubernetes-Exporters.md) | `base/` + `exporters/` |
 | [☀️ Morning Dashboards](Morning-Dashboards.md) | Grafana hierarchy |
 | [🔒 Security Hygiene](Security-Hygiene.md) | What stays out of git |
-| [🏷️ Release Notes](Release-Notes.md) | v1.0.0 |
+| [🏷️ Release Notes](Release-Notes.md) | v1.1.0 |
 
 Wiki: https://github.com/codingnanyong/observability/wiki

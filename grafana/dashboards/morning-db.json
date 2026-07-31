@@ -31,7 +31,7 @@
       "tags": []
     },
     {
-      "title": "이동",
+      "title": "Navigate",
       "type": "dashboards",
       "icon": "dashboard",
       "tags": [
@@ -58,14 +58,14 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "**DB · ${job}** · [← DBs](/d/morning-dbs) · [← Status](/d/morning-overview)\n\n① 점유 → ② TPS/Cache/Idle-in-xact → ③ database별\n\nConn Soft 70 · Idle-in-xact Soft 120s · 드롭다운으로 클러스터 전환"
+        "content": "**DB · ${job}** · [← DBs](/d/morning-dbs) · [← Status](/d/morning-overview)\n\n1 · Utilization → 2 · TPS/Cache/Idle-in-xact → 3 · Per database\n\nConn Soft 70 · Idle-in-xact Soft 120s · switch cluster via dropdown"
       },
       "transparent": false
     },
     {
       "id": 2,
       "type": "row",
-      "title": "① 점유/상태",
+      "title": "1 · Utilization / status",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -192,7 +192,7 @@
       },
       "targets": [
         {
-          "expr": "(sum(pg_stat_database_numbackends{job=\"$job\",datname!~\"template.*|postgres\"}) / clamp_min(max(pg_settings_max_connections{job=\"$job\"}), 1) * 100) or vector(0)",
+          "expr": "(sum(pg_stat_database_numbackends{job=\"$job\",datname!~\"template.*|postgres|airflow|openmetadata\"}) / clamp_min(max(pg_settings_max_connections{job=\"$job\"}), 1) * 100) or vector(0)",
           "refId": "A",
           "instant": true,
           "range": false,
@@ -244,7 +244,7 @@
           "valueSize": 36
         }
       },
-      "description": "max_connections 대비 backend 사용률. Soft ≥70 · Hard ≥85"
+      "description": "Backend usage vs max_connections. Soft ≥70 · Hard ≥85"
     },
     {
       "id": 5,
@@ -262,7 +262,7 @@
       },
       "targets": [
         {
-          "expr": "max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=\"$job\",datname!~\"template.*|postgres\"}) or vector(0)",
+          "expr": "max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=\"$job\",datname!~\"template.*|postgres|airflow|openmetadata\"}) or vector(0)",
           "refId": "A",
           "instant": true,
           "range": false,
@@ -313,7 +313,7 @@
           "valueSize": 36
         }
       },
-      "description": "idle in transaction 최장 시간. 길면 락/연결 누수 의. Soft ≥120 · Hard ≥300"
+      "description": "Max idle-in-transaction age. Long values suggest lock/connection leak. Soft ≥120 · Hard ≥300"
     },
     {
       "id": 6,
@@ -382,7 +382,7 @@
           "valueSize": 36
         }
       },
-      "description": "복제 lag(초). Soft ≥30 · Hard ≥120"
+      "description": "Replication lag (s). Soft ≥30 · Hard ≥120"
     },
     {
       "id": 7,
@@ -452,12 +452,12 @@
           "valueSize": 36
         }
       },
-      "description": "K8s PVC 사용률 (Docker PG는 해당 없음 가능). Soft ≥75 · Hard ≥90"
+      "description": "K8s PVC usage % (may N/A for Docker PG). Soft ≥75 · Hard ≥90"
     },
     {
       "id": 8,
       "type": "row",
-      "title": "② 성능 (트렌드)",
+      "title": "2 · Performance trends",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -483,7 +483,7 @@
       },
       "targets": [
         {
-          "expr": "(sum(pg_stat_database_numbackends{job=\"$job\",datname!~\"template.*|postgres\"}) / clamp_min(max(pg_settings_max_connections{job=\"$job\"}), 1) * 100) or vector(0)",
+          "expr": "(sum(pg_stat_database_numbackends{job=\"$job\",datname!~\"template.*|postgres|airflow|openmetadata\"}) / clamp_min(max(pg_settings_max_connections{job=\"$job\"}), 1) * 100) or vector(0)",
           "refId": "A",
           "legendFormat": "Conn%"
         },
@@ -608,7 +608,7 @@
       },
       "targets": [
         {
-          "expr": "max by (datname) (pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=\"$job\",datname!~\"template.*|postgres\"})",
+          "expr": "max by (datname) (pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=\"$job\",datname!~\"template.*|postgres|airflow|openmetadata\"})",
           "refId": "A",
           "legendFormat": "{{datname}}"
         },
@@ -714,7 +714,7 @@
           "sort": "desc"
         }
       },
-      "description": "DB별 idle-in-xact 최장. Soft 2m · Hard 5m"
+      "description": "Per-DB max idle-in-xact age. Soft 2m · Hard 5m"
     },
     {
       "id": 11,
@@ -732,12 +732,12 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(pg_stat_database_xact_commit{job=\"$job\",datname!~\"template.*|postgres\"}[5m])) or vector(0)",
+          "expr": "sum(rate(pg_stat_database_xact_commit{job=\"$job\",datname!~\"template.*|postgres|airflow|openmetadata\"}[5m])) or vector(0)",
           "refId": "A",
           "legendFormat": "commit/s"
         },
         {
-          "expr": "sum(rate(pg_stat_database_xact_rollback{job=\"$job\",datname!~\"template.*|postgres\"}[5m])) or vector(0)",
+          "expr": "sum(rate(pg_stat_database_xact_rollback{job=\"$job\",datname!~\"template.*|postgres|airflow|openmetadata\"}[5m])) or vector(0)",
           "refId": "B",
           "legendFormat": "rollback/s"
         }
@@ -837,7 +837,7 @@
     {
       "id": 12,
       "type": "timeseries",
-      "title": "Cache Hit % (높을수록 좋음)",
+      "title": "Cache Hit % (higher is better)",
       "gridPos": {
         "h": 7,
         "w": 12,
@@ -850,7 +850,7 @@
       },
       "targets": [
         {
-          "expr": "(sum(rate(pg_stat_database_blks_hit{job=\"$job\",datname!~\"template.*|postgres\"}[5m])) / clamp_min(sum(rate(pg_stat_database_blks_hit{job=\"$job\",datname!~\"template.*|postgres\"}[5m])) + sum(rate(pg_stat_database_blks_read{job=\"$job\",datname!~\"template.*|postgres\"}[5m])), 1e-9) * 100) or vector(0)",
+          "expr": "(sum(rate(pg_stat_database_blks_hit{job=\"$job\",datname!~\"template.*|postgres|airflow|openmetadata\"}[5m])) / clamp_min(sum(rate(pg_stat_database_blks_hit{job=\"$job\",datname!~\"template.*|postgres|airflow|openmetadata\"}[5m])) + sum(rate(pg_stat_database_blks_read{job=\"$job\",datname!~\"template.*|postgres|airflow|openmetadata\"}[5m])), 1e-9) * 100) or vector(0)",
           "refId": "A",
           "legendFormat": "hit%"
         },
@@ -1040,7 +1040,7 @@
           "sort": "desc"
         }
       },
-      "description": "공유 버퍼 캐시 적중률. 99% 이상이면 양호, 95% 미만이면 점검."
+      "description": "Shared buffer cache hit ratio. Good ≥99%; investigate if <95%."
     },
     {
       "id": 13,
@@ -1058,7 +1058,7 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(pg_stat_database_deadlocks{job=\"$job\",datname!~\"template.*|postgres\"}[5m])) or vector(0)",
+          "expr": "sum(increase(pg_stat_database_deadlocks{job=\"$job\",datname!~\"template.*|postgres|airflow|openmetadata\"}[5m])) or vector(0)",
           "refId": "A",
           "legendFormat": "deadlocks 5m"
         },
@@ -1168,7 +1168,7 @@
     {
       "id": 14,
       "type": "row",
-      "title": "③ database별 (형제)",
+      "title": "3 · Per database",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -1195,7 +1195,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (datname) (pg_stat_database_numbackends{job=\"$job\",datname!~\"template.*|postgres\"})",
+          "expr": "sum by (datname) (pg_stat_database_numbackends{job=\"$job\",datname!~\"template.*|postgres|airflow|openmetadata\"})",
           "format": "table",
           "instant": true
         }
@@ -1263,7 +1263,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (datname) (pg_database_size_bytes{job=\"$job\",datname!~\"template.*|postgres\"})",
+          "expr": "sum by (datname) (pg_database_size_bytes{job=\"$job\",datname!~\"template.*|postgres|airflow|openmetadata\"})",
           "format": "table",
           "instant": true
         }

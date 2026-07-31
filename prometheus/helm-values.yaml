@@ -1,10 +1,9 @@
 # Minimal starter values for kube-prometheus-stack.
 # Adjust storage, ingress, and retention for production.
 #
-# Security: keep Prometheus/Grafana as ClusterIP. Expose only via
-# authenticated Ingress, VPN, or `kubectl port-forward` — not NodePort
-# on every node IP. If you must use NodePort temporarily, firewall the
-# ports to admin CIDRs only and rotate Grafana admin credentials.
+# Security: keep Prometheus/Grafana as ClusterIP. Prefer port-forward,
+# VPN, or authenticated Ingress — do not publish NodePort on untrusted
+# networks (Prometheus has no auth by default).
 
 prometheus:
   prometheusSpec:
@@ -83,3 +82,16 @@ alertmanager:
       - name: default
       # Keep this receiver for compatibility with chart-generated routes.
       - name: "null"
+
+# kube-state-metrics was BestEffort and flapped (liveness 503) → empty kube_* series
+# made DataPipeline/APIs Status look Hard while apps were fine.
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+  # Give list/watch time before livez must succeed
+  customLabels: {}

@@ -30,7 +30,7 @@ data:
           "tags": []
         },
         {
-          "title": "이동",
+          "title": "Navigate",
           "type": "dashboards",
           "icon": "dashboard",
           "tags": [
@@ -57,14 +57,14 @@ data:
           },
           "options": {
             "mode": "markdown",
-            "content": "**DBs** · [← Status](/d/morning-overview) · [pg-primary](/d/morning-db?var-job=postgres-exporter-k8s) · [pg-legacy](/d/morning-db?var-job=postgres-exporter-docker)\n\n클러스터별 점유율 · 클릭 → DB 상세 · Conn Soft 70 · Hard 85"
+            "content": "**DBs** · [← Status](/d/morning-overview) · [platform-pg](/d/morning-db?var-job=postgres-exporter-k8s) · [docker-pg](/d/morning-db?var-job=postgres-exporter-docker)\n\nPer-cluster utilization · click → DB detail · Conn Soft 70 · Hard 85"
           },
           "transparent": false
         },
         {
           "id": 2,
           "type": "row",
-          "title": "pg-primary (K8s) · 클릭 → 상세",
+          "title": "platform-pg (K8s) · click → detail",
           "collapsed": false,
           "gridPos": {
             "h": 1,
@@ -198,7 +198,7 @@ data:
           },
           "targets": [
             {
-              "expr": "(sum(pg_stat_database_numbackends{job=\"postgres-exporter-k8s\",datname!~\"template.*|postgres\"}) / clamp_min(max(pg_settings_max_connections{job=\"postgres-exporter-k8s\"}), 1) * 100) or vector(0)",
+              "expr": "(sum(pg_stat_database_numbackends{job=\"postgres-exporter-k8s\",datname!~\"template.*|postgres|airflow|openmetadata\"}) / clamp_min(max(pg_settings_max_connections{job=\"postgres-exporter-k8s\"}), 1) * 100) or vector(0)",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -257,7 +257,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "max_connections 대비 backend 사용률. Soft ≥70 · Hard ≥85"
+          "description": "Backend usage vs max_connections. Soft ≥70 · Hard ≥85"
         },
         {
           "id": 5,
@@ -333,7 +333,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "복제 lag(초). Soft ≥30 · Hard ≥120"
+          "description": "Replication lag (s). Soft ≥30 · Hard ≥120"
         },
         {
           "id": 6,
@@ -410,12 +410,12 @@ data:
               "valueSize": 36
             }
           },
-          "description": "K8s PVC 사용률. Soft ≥75 · Hard ≥90"
+          "description": "K8s PVC usage %. Soft ≥75 · Hard ≥90"
         },
         {
           "id": 7,
           "type": "row",
-          "title": "pg-legacy (legacy) · 클릭 → 상세",
+          "title": "docker-pg (legacy) · click → detail",
           "collapsed": false,
           "gridPos": {
             "h": 1,
@@ -549,7 +549,7 @@ data:
           },
           "targets": [
             {
-              "expr": "(sum(pg_stat_database_numbackends{job=\"postgres-exporter-docker\",datname!~\"template.*|postgres\"}) / clamp_min(max(pg_settings_max_connections{job=\"postgres-exporter-docker\"}), 1) * 100) or vector(0)",
+              "expr": "(sum(pg_stat_database_numbackends{job=\"postgres-exporter-docker\",datname!~\"template.*|postgres|airflow|openmetadata\"}) / clamp_min(max(pg_settings_max_connections{job=\"postgres-exporter-docker\"}), 1) * 100) or vector(0)",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -608,7 +608,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "max_connections 대비 backend 사용률. Soft ≥70 · Hard ≥85"
+          "description": "Backend usage vs max_connections. Soft ≥70 · Hard ≥85"
         },
         {
           "id": 10,
@@ -684,7 +684,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "복제 lag(초). Soft ≥30 · Hard ≥120"
+          "description": "Replication lag (s). Soft ≥30 · Hard ≥120"
         },
         {
           "id": 11,
@@ -702,7 +702,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(pg_stat_database_numbackends{job=\"postgres-exporter-docker\",datname!~\"template.*|postgres\"}) or vector(0)",
+              "expr": "sum(pg_stat_database_numbackends{job=\"postgres-exporter-docker\",datname!~\"template.*|postgres|airflow|openmetadata\"}) or vector(0)",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -752,7 +752,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "현재 backend 연결 수."
+          "description": "Current backend connection count."
         }
       ],
       "refresh": "30s",

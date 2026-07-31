@@ -30,7 +30,7 @@ data:
           "tags": []
         },
         {
-          "title": "이동",
+          "title": "Navigate",
           "type": "dashboards",
           "icon": "dashboard",
           "tags": [
@@ -79,7 +79,7 @@ data:
           "id": 3,
           "type": "table",
           "title": "",
-          "description": "Shows only checks past Soft. Hidden when none are firing.",
+          "description": "Active Soft checks. CrashLoop/ImagePull only (not Airflow Failed task pods). PG idle-in-xact excludes airflow/openmetadata.",
           "gridPos": {
             "h": 5,
             "w": 24,
@@ -92,7 +92,7 @@ data:
           },
           "targets": [
             {
-              "expr": "\nlabel_replace(((sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"}) or vector(0)) >= bool 150000), \"check\", \"CTM Lag ≥ 150k\", \"\", \"\")\nor label_replace(((max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0)) >= bool 70), \"check\", \"DB Conn% ≥ 70\", \"\", \"\")\nor label_replace(((sum(increase(airflow_dagrun_failed_count[5m])) or vector(0)) >= bool 1), \"check\", \"DAG fail 5m ≥ 1\", \"\", \"\")\nor label_replace(((sum(increase(airflow_ti_failures[5m])) or vector(0)) >= bool 5), \"check\", \"Task fail 5m ≥ 5\", \"\", \"\")\nor label_replace(((sum(kube_pod_status_phase{namespace=~\"kafka|airflow|postgres|observability|data\",phase=~\"Failed|Unknown\"} == 1) or vector(0)) >= bool 1), \"check\", \"Bad Pods ≥ 1\", \"\", \"\")\nor label_replace(((sum(kafka_connect_connector_state{state=\"FAILED\"}) or vector(0)) >= bool 1), \"check\", \"Connect FAILED ≥ 1\", \"\", \"\")\nor label_replace(((max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) or vector(0)) >= bool 120), \"check\", \"PG idle-in-xact age ≥ 2m\", \"\", \"\")\nor label_replace(((max(morning:node_mem_util:percent) or vector(0)) >= bool 80), \"check\", \"Host Memory ≥ 80%\", \"\", \"\")\nor label_replace(((max(morning:node_cpu_util:percent) or vector(0)) >= bool 80), \"check\", \"Host CPU ≥ 80%\", \"\", \"\")\n",
+              "expr": "label_replace(((max(ctm_bronze_freshness_lag_seconds{stream=\"measurement\"}) or vector(0)) >= bool 120), \"check\", \"CTM measurement ≥ 120s\", \"\", \"\") or label_replace(((max(banb_bronze_freshness_lag_seconds{stream=\"env_temperature_ingest\"}) or vector(0)) >= bool 120), \"check\", \"BANB ingest ≥ 120s\", \"\", \"\") or label_replace(((max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres|airflow|openmetadata\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0)) >= bool 70), \"check\", \"DB Conn% ≥ 70\", \"\", \"\") or label_replace(((sum(increase(airflow_dagrun_failed_count[5m])) or vector(0)) >= bool 1), \"check\", \"DAG fail 5m ≥ 1\", \"\", \"\") or label_replace(((sum(increase(airflow_ti_failures[5m])) or vector(0)) >= bool 5), \"check\", \"Task fail 5m ≥ 5\", \"\", \"\") or label_replace((((sum(kube_pod_container_status_waiting_reason{namespace=~\"kafka|airflow|postgres|observability|data|api-core|api-portal\",reason=~\"CrashLoopBackOff|ImagePullBackOff|ErrImagePull|CreateContainerConfigError|InvalidImageName\"} == 1) or vector(0))) >= bool 1), \"check\", \"CrashLoop/ImagePull ≥ 1\", \"\", \"\") or label_replace((((sum(kafka_connect_connector_state{state=\"FAILED\"}) or vector(0)) + (sum(kafka_connect_task_state{state=\"FAILED\"}) or vector(0))) >= bool 1), \"check\", \"Connect FAILED ≥ 1\", \"\", \"\") or label_replace(((max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres|airflow|openmetadata\"}) or vector(0)) >= bool 120), \"check\", \"PG idle-in-xact age ≥ 2m\", \"\", \"\") or label_replace(((max(morning:node_mem_util:percent) or vector(0)) >= bool 80), \"check\", \"Host Memory ≥ 80%\", \"\", \"\") or label_replace(((max(morning:node_cpu_util:percent) or vector(0)) >= bool 80), \"check\", \"Host CPU ≥ 80%\", \"\", \"\")",
               "refId": "A",
               "format": "table",
               "instant": true
@@ -159,7 +159,8 @@ data:
               "decimals": 0,
               "custom": {
                 "align": "left"
-              }
+              },
+              "unit": "short"
             },
             "overrides": [
               {
@@ -627,7 +628,7 @@ data:
           },
           "targets": [
             {
-              "expr": "max((label_replace((clamp_max(((count((pg_up{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"} == 1) and on(job, instance) (up{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"} == 1)) or vector(0)) < bool 2) + ((count((pg_up{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"} == 1) and on(job, instance) (up{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"} == 1)) or vector(0)) < bool 1), 2)), \"s\", \"0\", \"\", \"\") or label_replace((clamp_max((((max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0))) >= bool 70) + (((max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0))) >= bool 85), 2)), \"s\", \"1\", \"\", \"\") or label_replace((clamp_max((((max((kubelet_volume_stats_used_bytes{namespace=\"postgres\"} / kubelet_volume_stats_capacity_bytes{namespace=\"postgres\"}) * 100) or vector(0))) >= bool 75) + (((max((kubelet_volume_stats_used_bytes{namespace=\"postgres\"} / kubelet_volume_stats_capacity_bytes{namespace=\"postgres\"}) * 100) or vector(0))) >= bool 90), 2)), \"s\", \"2\", \"\", \"\") or label_replace((clamp_max((((max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) or vector(0))) >= bool 120) + (((max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) or vector(0))) >= bool 300), 2)), \"s\", \"3\", \"\", \"\")))",
+              "expr": "max((label_replace((clamp_max(((count((pg_up{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"} == 1) and on(job, instance) (up{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"} == 1)) or vector(0)) < bool 2) + ((count((pg_up{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"} == 1) and on(job, instance) (up{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"} == 1)) or vector(0)) < bool 1), 2)), \"s\", \"0\", \"\", \"\") or label_replace((clamp_max((((max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres|airflow|openmetadata\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0))) >= bool 70) + (((max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres|airflow|openmetadata\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0))) >= bool 85), 2)), \"s\", \"1\", \"\", \"\") or label_replace((clamp_max((((max((kubelet_volume_stats_used_bytes{namespace=\"postgres\"} / kubelet_volume_stats_capacity_bytes{namespace=\"postgres\"}) * 100) or vector(0))) >= bool 75) + (((max((kubelet_volume_stats_used_bytes{namespace=\"postgres\"} / kubelet_volume_stats_capacity_bytes{namespace=\"postgres\"}) * 100) or vector(0))) >= bool 90), 2)), \"s\", \"2\", \"\", \"\") or label_replace((clamp_max((((max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres|airflow|openmetadata\"}) or vector(0))) >= bool 120) + (((max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres|airflow|openmetadata\"}) or vector(0))) >= bool 300), 2)), \"s\", \"3\", \"\", \"\")))",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -751,7 +752,7 @@ data:
           },
           "targets": [
             {
-              "expr": "max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0)",
+              "expr": "max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres|airflow|openmetadata\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0)",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -828,7 +829,7 @@ data:
           },
           "targets": [
             {
-              "expr": "max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) or vector(0)",
+              "expr": "max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres|airflow|openmetadata\"}) or vector(0)",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -984,7 +985,7 @@ data:
           "title": "Status",
           "gridPos": {
             "h": 4,
-            "w": 6,
+            "w": 4,
             "x": 0,
             "y": 21
           },
@@ -994,7 +995,7 @@ data:
           },
           "targets": [
             {
-              "expr": "max((label_replace(((((clamp_max(count(kube_pod_status_ready{namespace=\"airflow\",pod=~\"airflow-scheduler-.*\",condition=\"true\"}==1), 1) or vector(0)) < bool 1) * 2)), \"s\", \"0\", \"\", \"\") or label_replace((clamp_max((((sum(increase(airflow_ti_failures[5m])) or vector(0))) >= bool 5) + (((sum(increase(airflow_ti_failures[5m])) or vector(0))) >= bool 20), 2)), \"s\", \"1\", \"\", \"\") or label_replace((clamp_max((((sum(increase(airflow_dagrun_failed_count[5m])) or vector(0))) >= bool 1) + (((sum(increase(airflow_dagrun_failed_count[5m])) or vector(0))) >= bool 3), 2)), \"s\", \"2\", \"\", \"\") or label_replace((clamp_max((((sum(kafka_connect_connector_running == bool 0) or vector(0))) >= bool 1) + (((sum(kafka_connect_connector_running == bool 0) or vector(0))) >= bool 2), 2)), \"s\", \"3\", \"\", \"\") or label_replace((clamp_max((((sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"}) or vector(0))) >= bool 150000) + (((sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"}) or vector(0))) >= bool 500000), 2)), \"s\", \"4\", \"\", \"\")))",
+              "expr": "max((label_replace(((((max(up{job=\"kube-state-metrics\"}) or vector(0)) >= bool 1) * ((clamp_max(count(kube_pod_status_ready{namespace=\"airflow\",pod=~\"airflow-scheduler-.*\",condition=\"true\"}==1), 1) or vector(0)) < bool 1) * 2)), \"s\", \"0\", \"\", \"\") or label_replace((clamp_max((((sum(increase(airflow_ti_failures[5m])) or vector(0))) >= bool 5) + (((sum(increase(airflow_ti_failures[5m])) or vector(0))) >= bool 20), 2)), \"s\", \"1\", \"\", \"\") or label_replace((clamp_max((((sum(increase(airflow_dagrun_failed_count[5m])) or vector(0))) >= bool 1) + (((sum(increase(airflow_dagrun_failed_count[5m])) or vector(0))) >= bool 3), 2)), \"s\", \"2\", \"\", \"\") or label_replace((clamp_max((((sum(kafka_connect_connector_running == bool 0) or vector(0))) >= bool 1) + (((sum(kafka_connect_connector_running == bool 0) or vector(0))) >= bool 2), 2)), \"s\", \"3\", \"\", \"\") or label_replace((clamp_max((((max(ctm_bronze_freshness_lag_seconds{stream=\"measurement\"}) or vector(0))) >= bool 120) + (((max(ctm_bronze_freshness_lag_seconds{stream=\"measurement\"}) or vector(0))) >= bool 600), 2)), \"s\", \"4\", \"\", \"\") or label_replace((clamp_max((((max(banb_bronze_freshness_lag_seconds{stream=\"env_temperature_ingest\"}) or vector(0))) >= bool 120) + (((max(banb_bronze_freshness_lag_seconds{stream=\"env_temperature_ingest\"}) or vector(0))) >= bool 600), 2)), \"s\", \"5\", \"\", \"\") or label_replace((clamp_max((((sum(kafka_connect_task_state{state=\"FAILED\"}) or vector(0))) >= bool 1) + (((sum(kafka_connect_task_state{state=\"FAILED\"}) or vector(0))) >= bool 2), 2)), \"s\", \"6\", \"\", \"\")))",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -1100,16 +1101,16 @@ data:
               "valueSize": 36
             }
           },
-          "description": "Rollup of scheduler, AF fail, Broken connectors, and CTM Soft/Hard."
+          "description": "Rollup: Scheduler, Task/DAG fail, Broken connectors, FAILED tasks, CTM freshness, BANB ingest. Kube signals require kube-state-metrics up."
         },
         {
           "id": 16,
           "type": "stat",
-          "title": "AF fail 5m",
+          "title": "Task fail 5m",
           "gridPos": {
             "h": 4,
-            "w": 6,
-            "x": 6,
+            "w": 4,
+            "x": 4,
             "y": 21
           },
           "datasource": {
@@ -1176,7 +1177,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "Task Instance failures in the last 5 minutes. Soft ≥5 · Hard ≥20"
+          "description": "Airflow TI failures (5m). Soft≥5 Hard≥20. Same metric as DataPipeline / Airflow detail."
         },
         {
           "id": 17,
@@ -1184,8 +1185,8 @@ data:
           "title": "KF Broken",
           "gridPos": {
             "h": 4,
-            "w": 6,
-            "x": 12,
+            "w": 4,
+            "x": 8,
             "y": 21
           },
           "datasource": {
@@ -1257,11 +1258,11 @@ data:
         {
           "id": 18,
           "type": "stat",
-          "title": "CTM Lag",
+          "title": "CTM freshness",
           "gridPos": {
             "h": 4,
             "w": 6,
-            "x": 18,
+            "x": 12,
             "y": 21
           },
           "datasource": {
@@ -1270,7 +1271,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"}) or vector(0)",
+              "expr": "max(ctm_bronze_freshness_lag_seconds{stream=\"measurement\"})",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -1279,8 +1280,8 @@ data:
           ],
           "fieldConfig": {
             "defaults": {
-              "unit": "short",
-              "decimals": 0,
+              "unit": "s",
+              "decimals": 1,
               "min": 0,
               "thresholds": {
                 "mode": "absolute",
@@ -1291,11 +1292,11 @@ data:
                   },
                   {
                     "color": "orange",
-                    "value": 150000
+                    "value": 120
                   },
                   {
                     "color": "red",
-                    "value": 500000
+                    "value": 600
                   }
                 ]
               },
@@ -1307,7 +1308,8 @@ data:
                   "targetBlank": false,
                   "keepTime": true
                 }
-              ]
+              ],
+              "noValue": "n/a"
             },
             "overrides": []
           },
@@ -1325,10 +1327,87 @@ data:
             "textMode": "value",
             "text": {
               "titleSize": 13,
-              "valueSize": 36
+              "valueSize": 28
             }
           },
-          "description": "Sum of CTM sink consumergroup lag. Soft ≥150000 · Hard ≥500000"
+          "description": "measurement bronze freshness (now − max(time)). Soft ≥120s · Hard ≥600s. Click DataPipeline for Kafka lag detail."
+        },
+        {
+          "id": 120,
+          "type": "stat",
+          "title": "BANB ingest",
+          "description": "Last banb_env landing (etl_ingest_time). Soft≥120s Hard≥600s. capture_dt Soft unused (source clock ~4m behind).",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 21
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(banb_bronze_freshness_lag_seconds{stream=\"env_temperature_ingest\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "decimals": 1,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 120
+                  },
+                  {
+                    "color": "red",
+                    "value": 600
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Detail",
+                  "url": "/d/morning-datapipeline",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ],
+              "noValue": "n/a"
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 28
+            }
+          }
         },
         {
           "id": 19,
@@ -1359,7 +1438,7 @@ data:
           },
           "targets": [
             {
-              "expr": "max((label_replace((((((max(kube_deployment_status_replicas_available{namespace=\"api-portal\",deployment=\"api-portal\"}) > bool 0) or vector(0)) < bool 1) * 2)), \"s\", \"0\", \"\", \"\") or label_replace((((((max(kube_deployment_status_replicas_available{namespace=\"api-core\",deployment=\"api-core\"}) > bool 0) or vector(0)) < bool 1) * 2)), \"s\", \"1\", \"\", \"\") or label_replace((clamp_max(((((sum(rate(http_requests_total{job=\"api-portal\",status=~\"[45]..\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"api-portal\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0), 1e-9) * 100)) >= bool 1) + ((((sum(rate(http_requests_total{job=\"api-portal\",status=~\"[45]..\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"api-portal\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0), 1e-9) * 100)) >= bool 5), 2)), \"s\", \"2\", \"\", \"\") or label_replace((clamp_max(((((sum(rate(http_requests_total{job=\"api-core\",status=~\"[45]..\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"api-core\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0), 1e-9) * 100)) >= bool 1) + ((((sum(rate(http_requests_total{job=\"api-core\",status=~\"[45]..\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"api-core\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0), 1e-9) * 100)) >= bool 5), 2)), \"s\", \"3\", \"\", \"\")))",
+              "expr": "max((label_replace(((((max(up{job=\"kube-state-metrics\"}) or vector(0)) >= bool 1) * (((max(kube_deployment_status_replicas_available{namespace=\"api-portal\",deployment=\"api-portal\"}) > bool 0) or vector(0)) < bool 1) * 2)), \"s\", \"0\", \"\", \"\") or label_replace(((((max(up{job=\"kube-state-metrics\"}) or vector(0)) >= bool 1) * (((max(kube_deployment_status_replicas_available{namespace=\"api-core\",deployment=\"api-core\"}) > bool 0) or vector(0)) < bool 1) * 2)), \"s\", \"1\", \"\", \"\") or label_replace((clamp_max(((((sum(rate(http_requests_total{job=\"api-portal\",status=~\"[45]..\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"api-portal\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0), 1e-9) * 100)) >= bool 1) + ((((sum(rate(http_requests_total{job=\"api-portal\",status=~\"[45]..\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"api-portal\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0), 1e-9) * 100)) >= bool 5), 2)), \"s\", \"2\", \"\", \"\") or label_replace((clamp_max(((((sum(rate(http_requests_total{job=\"api-core\",status=~\"[45]..\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"api-core\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0), 1e-9) * 100)) >= bool 1) + ((((sum(rate(http_requests_total{job=\"api-core\",status=~\"[45]..\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"api-core\",handler!~\"/health|/info|^/$|/api/healthz|.*/health.*|/metrics|.*/docs|.*/redoc|.*/openapi.json\"}[5m])) or vector(0), 1e-9) * 100)) >= bool 5), 2)), \"s\", \"3\", \"\", \"\")))",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -1465,7 +1544,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "Rollup of deployment availability and HTTP Error % Soft/Hard."
+          "description": "Rollup: API deploy availability + HTTP Error %. Deploy signals require kube-state-metrics up."
         },
         {
           "id": 21,
@@ -1542,12 +1621,12 @@ data:
               "valueSize": 36
             }
           },
-          "description": "Deployments available (expect 2: portal + core). 경고 <1 · 정상 ≥2"
+          "description": "Deployments available (expect 2: hmi + unified). Warn <1 · OK ≥2"
         },
         {
           "id": 22,
           "type": "stat",
-          "title": "portal Err%",
+          "title": "hmi Err%",
           "gridPos": {
             "h": 4,
             "w": 6,
@@ -1624,7 +1703,7 @@ data:
         {
           "id": 23,
           "type": "stat",
-          "title": "core Err%",
+          "title": "unified Err%",
           "gridPos": {
             "h": 4,
             "w": 6,
@@ -1727,7 +1806,7 @@ data:
           },
           "targets": [
             {
-              "expr": "max((label_replace(((((max(up{job=\"kube-prometheus-stack-prometheus\"}) or vector(0)) < bool 1) * 2)), \"s\", \"0\", \"\", \"\") or label_replace(((((max(up{job=\"kube-prometheus-stack-grafana\"}) or clamp_max(count(kube_pod_status_ready{namespace=\"observability\",pod=~\"kube-prometheus-stack-grafana-.*\",condition=\"true\"}==1), 1) or vector(0)) < bool 1) * 2)), \"s\", \"1\", \"\", \"\") or label_replace((clamp_max(((count(up{namespace=\"observability\"} == 0) or vector(0)) >= bool 1) + ((count(up{namespace=\"observability\"} == 0) or vector(0)) >= bool 3), 2)), \"s\", \"2\", \"\", \"\")))",
+              "expr": "max((label_replace(((((max(up{job=\"kube-prometheus-stack-prometheus\"}) or vector(0)) < bool 1) * 2)), \"s\", \"0\", \"\", \"\") or label_replace(((((max(up{job=\"kube-prometheus-stack-grafana\"}) or clamp_max(count(kube_pod_status_ready{namespace=\"observability\",pod=~\"kube-prometheus-stack-grafana-.*\",condition=\"true\"}==1), 1) or vector(0)) < bool 1) * 2)), \"s\", \"1\", \"\", \"\") or label_replace((clamp_max((((count(up{namespace=\"observability\",job=~\"kube-prometheus-stack-prometheus|kube-prometheus-stack-grafana|kube-prometheus-stack-alertmanager\"} == 0) or vector(0))) >= bool 1) + (((count(up{namespace=\"observability\",job=~\"kube-prometheus-stack-prometheus|kube-prometheus-stack-grafana|kube-prometheus-stack-alertmanager\"} == 0) or vector(0))) >= bool 3), 2)), \"s\", \"2\", \"\", \"\")))",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -1833,7 +1912,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "Rollup of Prometheus/Grafana availability and scrape downs."
+          "description": "Rollup: Prometheus/Grafana up + critical scrape downs (prom/grafana/alertmanager only)."
         },
         {
           "id": 26,
@@ -1851,7 +1930,7 @@ data:
           },
           "targets": [
             {
-              "expr": "count(up{namespace=\"observability\"} == 0) or vector(0)",
+              "expr": "count(up{namespace=\"observability\",job=~\"kube-prometheus-stack-prometheus|kube-prometheus-stack-grafana|kube-prometheus-stack-alertmanager\"} == 0) or vector(0)",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -1909,7 +1988,7 @@ data:
               "valueSize": 36
             }
           },
-          "description": "Scrape targets down in the observability namespace. Soft ≥1 · Hard ≥3"
+          "description": "DOWN among prometheus/grafana/alertmanager only (not kube-state-metrics flaps). Soft≥1 Hard≥3"
         },
         {
           "id": 27,
@@ -2146,9 +2225,9 @@ data:
               "type": "prometheus",
               "uid": "prometheus"
             },
-            "query": "query_result(label_replace(count((label_replace(((sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"}) or vector(0)) >= bool 150000), \"check\", \"CTM Lag ≥ 150k\", \"\", \"\") or label_replace(((max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0)) >= bool 70), \"check\", \"DB Conn% ≥ 70\", \"\", \"\") or label_replace(((sum(increase(airflow_dagrun_failed_count[5m])) or vector(0)) >= bool 1), \"check\", \"DAG fail 5m ≥ 1\", \"\", \"\") or label_replace(((sum(increase(airflow_ti_failures[5m])) or vector(0)) >= bool 5), \"check\", \"Task fail 5m ≥ 5\", \"\", \"\") or label_replace(((sum(kube_pod_status_phase{namespace=~\"kafka|airflow|postgres|observability|data\",phase=~\"Failed|Unknown\"} == 1) or vector(0)) >= bool 1), \"check\", \"Bad Pods ≥ 1\", \"\", \"\") or label_replace(((sum(kafka_connect_connector_state{state=\"FAILED\"}) or vector(0)) >= bool 1), \"check\", \"Connect FAILED ≥ 1\", \"\", \"\") or label_replace(((max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) or vector(0)) >= bool 120), \"check\", \"PG idle-in-xact age ≥ 2m\", \"\", \"\") or label_replace(((max(morning:node_mem_util:percent) or vector(0)) >= bool 80), \"check\", \"Host Memory ≥ 80%\", \"\", \"\") or label_replace(((max(morning:node_cpu_util:percent) or vector(0)) >= bool 80), \"check\", \"Host CPU ≥ 80%\", \"\", \"\")) == 1) > 0, \"gate\", \"발생\", \"\", \"\"))",
+            "query": "query_result(label_replace(count((label_replace(((max(ctm_bronze_freshness_lag_seconds{stream=\"measurement\"}) or vector(0)) >= bool 120), \"check\", \"CTM measurement ≥ 120s\", \"\", \"\") or label_replace(((max(banb_bronze_freshness_lag_seconds{stream=\"env_temperature_ingest\"}) or vector(0)) >= bool 120), \"check\", \"BANB ingest ≥ 120s\", \"\", \"\") or label_replace(((max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres|airflow|openmetadata\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0)) >= bool 70), \"check\", \"DB Conn% ≥ 70\", \"\", \"\") or label_replace(((sum(increase(airflow_dagrun_failed_count[5m])) or vector(0)) >= bool 1), \"check\", \"DAG fail 5m ≥ 1\", \"\", \"\") or label_replace(((sum(increase(airflow_ti_failures[5m])) or vector(0)) >= bool 5), \"check\", \"Task fail 5m ≥ 5\", \"\", \"\") or label_replace((((sum(kube_pod_container_status_waiting_reason{namespace=~\"kafka|airflow|postgres|observability|data|api-core|api-portal\",reason=~\"CrashLoopBackOff|ImagePullBackOff|ErrImagePull|CreateContainerConfigError|InvalidImageName\"} == 1) or vector(0))) >= bool 1), \"check\", \"CrashLoop/ImagePull ≥ 1\", \"\", \"\") or label_replace((((sum(kafka_connect_connector_state{state=\"FAILED\"}) or vector(0)) + (sum(kafka_connect_task_state{state=\"FAILED\"}) or vector(0))) >= bool 1), \"check\", \"Connect FAILED ≥ 1\", \"\", \"\") or label_replace(((max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres|airflow|openmetadata\"}) or vector(0)) >= bool 120), \"check\", \"PG idle-in-xact age ≥ 2m\", \"\", \"\") or label_replace(((max(morning:node_mem_util:percent) or vector(0)) >= bool 80), \"check\", \"Host Memory ≥ 80%\", \"\", \"\") or label_replace(((max(morning:node_cpu_util:percent) or vector(0)) >= bool 80), \"check\", \"Host CPU ≥ 80%\", \"\", \"\")) == 1) > 0, \"gate\", \"Active\", \"\", \"\"))",
             "regex": "/gate=\"([^\"]+)\"/",
-            "definition": "query_result(label_replace(count((label_replace(((sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"}) or vector(0)) >= bool 150000), \"check\", \"CTM Lag ≥ 150k\", \"\", \"\") or label_replace(((max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0)) >= bool 70), \"check\", \"DB Conn% ≥ 70\", \"\", \"\") or label_replace(((sum(increase(airflow_dagrun_failed_count[5m])) or vector(0)) >= bool 1), \"check\", \"DAG fail 5m ≥ 1\", \"\", \"\") or label_replace(((sum(increase(airflow_ti_failures[5m])) or vector(0)) >= bool 5), \"check\", \"Task fail 5m ≥ 5\", \"\", \"\") or label_replace(((sum(kube_pod_status_phase{namespace=~\"kafka|airflow|postgres|observability|data\",phase=~\"Failed|Unknown\"} == 1) or vector(0)) >= bool 1), \"check\", \"Bad Pods ≥ 1\", \"\", \"\") or label_replace(((sum(kafka_connect_connector_state{state=\"FAILED\"}) or vector(0)) >= bool 1), \"check\", \"Connect FAILED ≥ 1\", \"\", \"\") or label_replace(((max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres\"}) or vector(0)) >= bool 120), \"check\", \"PG idle-in-xact age ≥ 2m\", \"\", \"\") or label_replace(((max(morning:node_mem_util:percent) or vector(0)) >= bool 80), \"check\", \"Host Memory ≥ 80%\", \"\", \"\") or label_replace(((max(morning:node_cpu_util:percent) or vector(0)) >= bool 80), \"check\", \"Host CPU ≥ 80%\", \"\", \"\")) == 1) > 0, \"gate\", \"발생\", \"\", \"\"))",
+            "definition": "query_result(label_replace(count((label_replace(((max(ctm_bronze_freshness_lag_seconds{stream=\"measurement\"}) or vector(0)) >= bool 120), \"check\", \"CTM measurement ≥ 120s\", \"\", \"\") or label_replace(((max(banb_bronze_freshness_lag_seconds{stream=\"env_temperature_ingest\"}) or vector(0)) >= bool 120), \"check\", \"BANB ingest ≥ 120s\", \"\", \"\") or label_replace(((max((sum by (job) (pg_stat_database_numbackends{job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres|airflow|openmetadata\"}) / clamp_min(max by (job) (pg_settings_max_connections{job=~\"postgres-exporter-k8s|postgres-exporter-docker\"}), 1) * 100)) or vector(0)) >= bool 70), \"check\", \"DB Conn% ≥ 70\", \"\", \"\") or label_replace(((sum(increase(airflow_dagrun_failed_count[5m])) or vector(0)) >= bool 1), \"check\", \"DAG fail 5m ≥ 1\", \"\", \"\") or label_replace(((sum(increase(airflow_ti_failures[5m])) or vector(0)) >= bool 5), \"check\", \"Task fail 5m ≥ 5\", \"\", \"\") or label_replace((((sum(kube_pod_container_status_waiting_reason{namespace=~\"kafka|airflow|postgres|observability|data|api-core|api-portal\",reason=~\"CrashLoopBackOff|ImagePullBackOff|ErrImagePull|CreateContainerConfigError|InvalidImageName\"} == 1) or vector(0))) >= bool 1), \"check\", \"CrashLoop/ImagePull ≥ 1\", \"\", \"\") or label_replace((((sum(kafka_connect_connector_state{state=\"FAILED\"}) or vector(0)) + (sum(kafka_connect_task_state{state=\"FAILED\"}) or vector(0))) >= bool 1), \"check\", \"Connect FAILED ≥ 1\", \"\", \"\") or label_replace(((max(pg_stat_activity_max_tx_duration{state=\"idle in transaction\",job=~\"postgres-exporter-k8s|postgres-exporter-docker\",datname!~\"template.*|postgres|airflow|openmetadata\"}) or vector(0)) >= bool 120), \"check\", \"PG idle-in-xact age ≥ 2m\", \"\", \"\") or label_replace(((max(morning:node_mem_util:percent) or vector(0)) >= bool 80), \"check\", \"Host Memory ≥ 80%\", \"\", \"\") or label_replace(((max(morning:node_cpu_util:percent) or vector(0)) >= bool 80), \"check\", \"Host CPU ≥ 80%\", \"\", \"\")) == 1) > 0, \"gate\", \"Active\", \"\", \"\"))",
             "current": {},
             "options": [],
             "includeAll": false,

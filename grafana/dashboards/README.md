@@ -31,15 +31,14 @@ L1 Morning Status (morning-overview)
 └─ Observability → morning-observability → morning-observability-detail
 ```
 
-Access (ClusterIP — no NodePort):
+Access (ClusterIP — do not publish NodePort on untrusted networks):
 
 ```bash
 kubectl -n observability port-forward svc/kube-prometheus-stack-grafana 3000:80
-# then open http://127.0.0.1:3000/d/morning-overview
+# open http://127.0.0.1:3000/d/morning-overview
 ```
 
-Site-specific node names / API doc links: copy
-`grafana/scripts/morning/site_local.example.py` → `site_local.py` (gitignored), then rebuild.
+Override host/API inventory locally via `site_local.py` (gitignored); see `site_local.example.py`.
 
 ## Helm (folder support)
 
@@ -59,7 +58,7 @@ kubectl -n observability get cm -l grafana_dashboard=1 -o name | grep -v morning
 
 ## PostgreSQL community templates (manual import)
 
-Import into a dedicated folder if you treat them as their own service (e.g. **JJ PostgreSQL**):
+Import into a dedicated folder if you treat them as their own service (e.g. **PostgreSQL**):
 
 - PostgreSQL Database (ID: 9628)
 - PostgreSQL Overview (ID: 455)

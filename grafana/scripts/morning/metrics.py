@@ -46,7 +46,7 @@ DISK = max_series(_DISK_BY)
 # DB clusters (add entries here to scale). job = Prometheus scrape job.
 def pg_conn(job: str) -> str:
     return (
-        f'(sum(pg_stat_database_numbackends{{job="{job}",datname!~"template.*|postgres"}}) '
+        f'(sum(pg_stat_database_numbackends{{job="{job}",datname!~"template.*|postgres|airflow|openmetadata"}}) '
         f'/ clamp_min(max(pg_settings_max_connections{{job="{job}"}}), 1) * 100) or vector(0)'
     )
 
@@ -58,7 +58,7 @@ def pg_lag(job: str) -> str:
 def pg_idle_xact(job: str) -> str:
     return (
         f'max(pg_stat_activity_max_tx_duration{{state="idle in transaction",'
-        f'job="{job}",datname!~"template.*|postgres"}}) or vector(0)'
+        f'job="{job}",datname!~"template.*|postgres|airflow|openmetadata"}}) or vector(0)'
     )
 
 
@@ -70,7 +70,7 @@ def pg_up(job: str) -> str:
 
 
 PG_CONN_MAX = (
-    f'max((sum by (job) (pg_stat_database_numbackends{{job=~"{PG_JOBS}",datname!~"template.*|postgres"}}) '
+    f'max((sum by (job) (pg_stat_database_numbackends{{job=~"{PG_JOBS}",datname!~"template.*|postgres|airflow|openmetadata"}}) '
     f'/ clamp_min(max by (job) (pg_settings_max_connections{{job=~"{PG_JOBS}"}}), 1) * 100)) or vector(0)'
 )
 PG_EXPORTERS_UP = (
@@ -85,7 +85,7 @@ AF_SCHED = 'clamp_max(count(kube_pod_status_ready{namespace="airflow",pod=~"airf
 CTM = 'sum(kafka_consumergroup_lag{consumergroup=~"connect-ctm-sink-.*"}) or vector(0)'
 BROKEN = 'sum(kafka_connect_connector_running == bool 0) or vector(0)'
 KF_BROKERS = 'count(kube_pod_status_ready{namespace="kafka",pod=~"kafka-cluster-combined-.*",condition="true"}==1) or vector(0)'
-BAD_PODS = 'sum((kube_pod_status_phase{namespace=~"kafka|airflow|postgres|observability|data|api-core|api-portal",phase=~"Failed|Unknown"} == 1)) or vector(0)'
+BAD_PODS = 'sum(kube_pod_container_status_waiting_reason{namespace=~"kafka|airflow|postgres|observability|data|api-core|api-portal",reason=~"CrashLoopBackOff|ImagePullBackOff|ErrImagePull|CreateContainerConfigError|InvalidImageName"} == 1) or vector(0)'
 DEPLOY_GAPS = 'sum(kube_deployment_status_replicas_unavailable{namespace=~"kafka|airflow|postgres|observability|data|api-core|api-portal"}) or vector(0)'
 
 ACTION = rf'''
@@ -95,7 +95,7 @@ or label_replace(((sum(increase(airflow_dagrun_failed_count[5m])) or vector(0)) 
 or label_replace(((sum(increase(airflow_ti_failures[5m])) or vector(0)) >= bool 5), "check", "Task fail 5m ≥ 5", "", "")
 or label_replace(((sum(kube_pod_status_phase{{namespace=~"kafka|airflow|postgres|observability|data",phase=~"Failed|Unknown"}} == 1) or vector(0)) >= bool 1), "check", "Bad Pods ≥ 1", "", "")
 or label_replace(((sum(kafka_connect_connector_state{{state="FAILED"}}) or vector(0)) >= bool 1), "check", "Connect FAILED ≥ 1", "", "")
-or label_replace(((max(pg_stat_activity_max_tx_duration{{state="idle in transaction",job=~"{PG_JOBS}",datname!~"template.*|postgres"}}) or vector(0)) >= bool {SOFT_IDLE_XACT}), "check", "PG idle-in-xact age ≥ 2m", "", "")
+or label_replace(((max(pg_stat_activity_max_tx_duration{{state="idle in transaction",job=~"{PG_JOBS}",datname!~"template.*|postgres|airflow|openmetadata"}}) or vector(0)) >= bool {SOFT_IDLE_XACT}), "check", "PG idle-in-xact age ≥ 2m", "", "")
 or label_replace(((max(morning:node_mem_util:percent) or vector(0)) >= bool 80), "check", "Host Memory ≥ 80%", "", "")
 or label_replace(((max(morning:node_cpu_util:percent) or vector(0)) >= bool 80), "check", "Host CPU ≥ 80%", "", "")
 '''
@@ -130,6 +130,13 @@ def _sev_low(expr: str, soft: float | int, hard: float | int) -> str:
 def _sev_down(expr: str) -> str:
     """Binary availability: 0 if up (expr≥1), else Hard(2)."""
     return f"((({expr}) < bool 1) * 2)"
+
+def _sev_down_ksm(expr: str) -> str:
+    """Like _sev_down but ignore gaps when kube-state-metrics is down."""
+    return (
+        f"(((max(up{{job=\"kube-state-metrics\"}}) or vector(0)) >= bool 1) "
+        f"* (({expr}) < bool 1) * 2)"
+    )
 
 
 def _max_sev(*parts: str) -> str:
@@ -172,12 +179,12 @@ def api_error_pct(job: str) -> str:
 
 PG_IDLE_MAX = (
     f'max(pg_stat_activity_max_tx_duration{{state="idle in transaction",'
-    f'job=~"{PG_JOBS}",datname!~"template.*|postgres"}}) or vector(0)'
+    f'job=~"{PG_JOBS}",datname!~"template.*|postgres|airflow|openmetadata"}}) or vector(0)'
 )
 NODES_NOT_READY = (
     'sum(kube_node_status_condition{condition="Ready",status="false"} == 1) or vector(0)'
 )
-OBS_TARGETS_DOWN = 'count(up{namespace="observability"} == 0) or vector(0)'
+OBS_TARGETS_DOWN = 'count(up{namespace="observability",job=~"kube-prometheus-stack-prometheus|kube-prometheus-stack-grafana|kube-prometheus-stack-alertmanager"} == 0) or vector(0)'
 
 # Section rollups for Overview (max severity across child signals).
 HOSTS_HEALTH = _max_sev(
@@ -193,15 +200,15 @@ DBS_HEALTH = _max_sev(
     _sev_high(f"({PG_IDLE_MAX})", SOFT_IDLE_XACT, HARD_IDLE_XACT),
 )
 PIPELINE_HEALTH = _max_sev(
-    _sev_down(AF_SCHED),
+    _sev_down_ksm(AF_SCHED),
     _sev_high(f"({AF_FAIL})", 5, 20),
     _sev_high(f"({AF_DAG_FAIL})", 1, 3),
     _sev_high(f"({BROKEN})", 1, 2),
     _sev_high(f"({CTM})", SOFT_CTM, HARD_CTM),
 )
 APIS_HEALTH = _max_sev(
-    _sev_down(API_PORTAL_UP),
-    _sev_down(API_CORE_UP),
+    _sev_down_ksm(API_PORTAL_UP),
+    _sev_down_ksm(API_CORE_UP),
     _sev_high(api_error_pct("api-portal"), 1, 5),
     _sev_high(api_error_pct("api-core"), 1, 5),
 )

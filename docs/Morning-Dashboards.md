@@ -45,3 +45,5 @@ kubectl apply -f grafana/configmaps/
 | 📈 Recording rules | `rules/morning-host-occupancy.yaml` |
 
 > 💡 Use `site_local.example.py` → `site_local.py` for host names (gitignored).
+>
+> ⚙️ Give kube-state-metrics CPU/memory limits (see `prometheus/helm-values.yaml`). Without them, flaps can blank `kube_*` series and make Morning Status look Hard while apps are fine. Overview rollups use `_sev_down_ksm` so those gaps are ignored while KSM is down.

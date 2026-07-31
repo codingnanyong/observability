@@ -42,7 +42,7 @@ data:
           "tags": []
         },
         {
-          "title": "이동",
+          "title": "Navigate",
           "type": "dashboards",
           "icon": "dashboard",
           "tags": [
@@ -128,7 +128,7 @@ data:
               "valueSize": 40
             }
           },
-          "description": "Ready=True 노드 수."
+          "description": "Count of Ready=True nodes."
         },
         {
           "id": 3,
@@ -185,7 +185,7 @@ data:
               "valueSize": 40
             }
           },
-          "description": "DiskPressure / MemoryPressure / PIDPressure 합.\n\nSoft ≥ 1 · Hard ≥ 2"
+          "description": "Sum of DiskPressure / MemoryPressure / PIDPressure.\n\nSoft ≥ 1 · Hard ≥ 2"
         },
         {
           "id": 4,
@@ -246,7 +246,7 @@ data:
               "valueSize": 40
             }
           },
-          "description": "Failed|Unknown 파드 수 (플랫폼 네임스페이스).\n\nSoft ≥ 1 · Hard ≥ 5"
+          "description": "Failed|Unknown pod count (platform namespaces).\n\nSoft ≥ 1 · Hard ≥ 5"
         },
         {
           "id": 5,
@@ -303,7 +303,7 @@ data:
               "valueSize": 40
             }
           },
-          "description": "Deployment unavailable replicas 합.\n\nSoft ≥ 1 · Hard ≥ 3"
+          "description": "Sum of Deployment unavailable replicas.\n\nSoft ≥ 1 · Hard ≥ 3"
         },
         {
           "id": 6,
@@ -436,7 +436,7 @@ data:
               "mode": "multi"
             }
           },
-          "description": "노드 CPU 사용률.\n\n점선 Soft = 80% · Hard = 90%"
+          "description": "Node CPU usage %.\n\nDashed Soft = 80% · Hard = 90%"
         },
         {
           "id": 7,
@@ -589,7 +589,7 @@ data:
               "mode": "multi"
             }
           },
-          "description": "노드 루트 디스크 사용률.\n\n점선 Soft = 80% · Hard = 90%"
+          "description": "Node root disk usage %.\n\nDashed Soft = 80% · Hard = 90%"
         },
         {
           "id": 8,
@@ -649,7 +649,7 @@ data:
             },
             "overrides": []
           },
-          "description": "네임스페이스별 파드 수 (Running 등)."
+          "description": "Pod count by namespace (Running, etc.)."
         }
       ],
       "refresh": "30s",
