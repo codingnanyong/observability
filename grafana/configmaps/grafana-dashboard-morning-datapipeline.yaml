@@ -22,7 +22,7 @@ data:
           "type": "link",
           "icon": "doc",
           "url": "/d/morning-overview",
-          "tooltip": "← Status",
+          "tooltip": "Morning Status",
           "targetBlank": false,
           "keepTime": true,
           "asDropdown": false,
@@ -30,7 +30,31 @@ data:
           "tags": []
         },
         {
-          "title": "이동",
+          "title": "Airflow",
+          "type": "link",
+          "icon": "dashboard",
+          "url": "/d/morning-airflow-perf",
+          "tooltip": "Airflow detail",
+          "targetBlank": false,
+          "keepTime": true,
+          "asDropdown": false,
+          "includeVars": false,
+          "tags": []
+        },
+        {
+          "title": "Kafka",
+          "type": "link",
+          "icon": "dashboard",
+          "url": "/d/morning-kafka-perf",
+          "tooltip": "Kafka detail",
+          "targetBlank": false,
+          "keepTime": true,
+          "asDropdown": false,
+          "includeVars": false,
+          "tags": []
+        },
+        {
+          "title": "Navigate",
           "type": "dashboards",
           "icon": "dashboard",
           "tags": [
@@ -50,39 +74,40 @@ data:
           "type": "text",
           "title": "",
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 24,
             "x": 0,
             "y": 0
           },
           "options": {
             "mode": "markdown",
-            "content": "**DataPipeline** · [← Status](/d/morning-overview) · [Airflow](/d/morning-airflow-perf) · [Kafka](/d/morning-kafka-perf)\n\n클릭 → **바로 차트/상세** · CTM Soft 150k · Task fail Soft ≥5"
+            "content": "**Data Pipeline** · [← Status](/d/morning-overview) · [Airflow detail](/d/morning-airflow-perf) · [Kafka detail](/d/morning-kafka-perf)\n\nAirflow health → Kafka platform → **CTM** (event freshness · lag) → **BANB** (ingest lag · lag). Soft freshness **120s** / Hard **600s** · Lag Soft **300k** / Hard **500k** · Task fail Soft **≥5**"
           },
           "transparent": false
         },
         {
-          "id": 2,
+          "id": 10,
           "type": "row",
-          "title": "Airflow · 클릭 → 차트/상세",
+          "title": "Airflow  ·  click → detail",
           "collapsed": false,
           "gridPos": {
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 4
+            "y": 3
           },
           "panels": []
         },
         {
-          "id": 3,
+          "id": 11,
           "type": "stat",
           "title": "StatsD",
+          "description": "StatsD exporter up",
           "gridPos": {
-            "h": 5,
+            "h": 4,
             "w": 6,
             "x": 0,
-            "y": 5
+            "y": 4
           },
           "datasource": {
             "type": "prometheus",
@@ -101,7 +126,7 @@ data:
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "min": 0,
+              "noValue": "—",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -132,29 +157,19 @@ data:
                   "type": "range",
                   "options": {
                     "from": 1,
-                    "to": 1,
+                    "to": 1000000000000.0,
                     "result": {
                       "text": "UP",
                       "color": "green",
                       "index": 1
                     }
                   }
-                },
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null+nan",
-                    "result": {
-                      "text": "NO DATA",
-                      "color": "orange",
-                      "index": 2
-                    }
-                  }
                 }
               ],
+              "min": 0,
               "links": [
                 {
-                  "title": "Detail",
+                  "title": "Airflow detail",
                   "url": "/d/morning-airflow-perf",
                   "targetBlank": false,
                   "keepTime": true
@@ -177,20 +192,20 @@ data:
             "textMode": "value",
             "text": {
               "titleSize": 13,
-              "valueSize": 36
+              "valueSize": 26
             }
-          },
-          "description": "Airflow StatsD exporter scrape."
+          }
         },
         {
-          "id": 4,
+          "id": 12,
           "type": "stat",
           "title": "Scheduler",
+          "description": "Scheduler Ready (≥1)",
           "gridPos": {
-            "h": 5,
+            "h": 4,
             "w": 6,
             "x": 6,
-            "y": 5
+            "y": 4
           },
           "datasource": {
             "type": "prometheus",
@@ -209,7 +224,7 @@ data:
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "min": 0,
+              "noValue": "—",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -240,29 +255,19 @@ data:
                   "type": "range",
                   "options": {
                     "from": 1,
-                    "to": 1,
+                    "to": 1000000000000.0,
                     "result": {
                       "text": "UP",
                       "color": "green",
                       "index": 1
                     }
                   }
-                },
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null+nan",
-                    "result": {
-                      "text": "NO DATA",
-                      "color": "orange",
-                      "index": 2
-                    }
-                  }
                 }
               ],
+              "min": 0,
               "links": [
                 {
-                  "title": "Detail",
+                  "title": "Airflow detail",
                   "url": "/d/morning-airflow-perf",
                   "targetBlank": false,
                   "keepTime": true
@@ -285,20 +290,20 @@ data:
             "textMode": "value",
             "text": {
               "titleSize": 13,
-              "valueSize": 36
+              "valueSize": 26
             }
-          },
-          "description": "Scheduler Pod Ready."
+          }
         },
         {
-          "id": 5,
+          "id": 13,
           "type": "stat",
           "title": "Task fail 5m",
+          "description": "Task instance failures (5m). Soft≥5 Hard≥20",
           "gridPos": {
-            "h": 5,
+            "h": 4,
             "w": 6,
             "x": 12,
-            "y": 5
+            "y": 4
           },
           "datasource": {
             "type": "prometheus",
@@ -317,7 +322,7 @@ data:
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "min": 0,
+              "noValue": "—",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -336,9 +341,10 @@ data:
                 ]
               },
               "mappings": [],
+              "min": 0,
               "links": [
                 {
-                  "title": "Detail",
+                  "title": "Airflow detail",
                   "url": "/d/morning-airflow-perf",
                   "targetBlank": false,
                   "keepTime": true
@@ -361,20 +367,20 @@ data:
             "textMode": "value",
             "text": {
               "titleSize": 13,
-              "valueSize": 36
+              "valueSize": 26
             }
-          },
-          "description": "최근 5분 TI 실패 수. Soft ≥5 · Hard ≥20"
+          }
         },
         {
-          "id": 6,
+          "id": 14,
           "type": "stat",
           "title": "Task OK 5m",
+          "description": "Task successes (5m)",
           "gridPos": {
-            "h": 5,
+            "h": 4,
             "w": 6,
             "x": 18,
-            "y": 5
+            "y": 4
           },
           "datasource": {
             "type": "prometheus",
@@ -393,7 +399,7 @@ data:
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "min": 0,
+              "noValue": "—",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -404,9 +410,10 @@ data:
                 ]
               },
               "mappings": [],
+              "min": 0,
               "links": [
                 {
-                  "title": "Detail",
+                  "title": "Airflow detail",
                   "url": "/d/morning-airflow-perf",
                   "targetBlank": false,
                   "keepTime": true
@@ -429,33 +436,33 @@ data:
             "textMode": "value",
             "text": {
               "titleSize": 13,
-              "valueSize": 36
+              "valueSize": 26
             }
-          },
-          "description": "최근 5분 TI 성공 수."
+          }
         },
         {
-          "id": 7,
+          "id": 20,
           "type": "row",
-          "title": "Kafka · 클릭 → 차트/상세",
+          "title": "Kafka · Platform  ·  click → detail",
           "collapsed": false,
           "gridPos": {
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 10
+            "y": 8
           },
           "panels": []
         },
         {
-          "id": 8,
+          "id": 21,
           "type": "stat",
           "title": "Brokers",
+          "description": "Ready brokers (≥3)",
           "gridPos": {
-            "h": 5,
+            "h": 4,
             "w": 6,
             "x": 0,
-            "y": 11
+            "y": 9
           },
           "datasource": {
             "type": "prometheus",
@@ -463,7 +470,7 @@ data:
           },
           "targets": [
             {
-              "expr": "count(kube_pod_status_ready{namespace=\"kafka\",pod=~\"kafka-cluster-combined-.*\",condition=\"true\"}==1) or vector(0)",
+              "expr": "count(kube_pod_status_ready{namespace=\"kafka\",pod=~\"kafka-cluster-combined-.*\",condition=\"true\"}==1)",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -474,7 +481,7 @@ data:
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "min": 0,
+              "noValue": "—",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -495,7 +502,7 @@ data:
               "mappings": [],
               "links": [
                 {
-                  "title": "Detail",
+                  "title": "Kafka detail",
                   "url": "/d/morning-kafka-perf",
                   "targetBlank": false,
                   "keepTime": true
@@ -518,20 +525,20 @@ data:
             "textMode": "value",
             "text": {
               "titleSize": 13,
-              "valueSize": 36
+              "valueSize": 26
             }
-          },
-          "description": "Ready broker Pod 수. 경고 <2 · 정상 ≥3"
+          }
         },
         {
-          "id": 9,
+          "id": 22,
           "type": "stat",
-          "title": "Broken",
+          "title": "Workers",
+          "description": "Connect workers Ready (≥2)",
           "gridPos": {
-            "h": 5,
+            "h": 4,
             "w": 6,
             "x": 6,
-            "y": 11
+            "y": 9
           },
           "datasource": {
             "type": "prometheus",
@@ -539,7 +546,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(kafka_connect_connector_running == bool 0) or vector(0)",
+              "expr": "count(kube_pod_status_ready{namespace=\"kafka\",pod=~\"kafka-connect-connect-.*\",condition=\"true\"}==1)",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -550,7 +557,83 @@ data:
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "min": 0,
+              "noValue": "—",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "green",
+                    "value": 2
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Kafka detail",
+                  "url": "/d/morning-kafka-perf",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 26
+            }
+          }
+        },
+        {
+          "id": 23,
+          "type": "stat",
+          "title": "Broken connectors",
+          "description": "Not Running. Soft≥1 Hard≥2",
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 9
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum(kafka_connect_connector_running == bool 0)",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "noValue": "—",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -569,9 +652,10 @@ data:
                 ]
               },
               "mappings": [],
+              "min": 0,
               "links": [
                 {
-                  "title": "Detail",
+                  "title": "Kafka detail",
                   "url": "/d/morning-kafka-perf",
                   "targetBlank": false,
                   "keepTime": true
@@ -594,20 +678,20 @@ data:
             "textMode": "value",
             "text": {
               "titleSize": 13,
-              "valueSize": 36
+              "valueSize": 26
             }
-          },
-          "description": "Running이 아닌 connector 수. Soft ≥1 · Hard ≥2"
+          }
         },
         {
-          "id": 10,
+          "id": 24,
           "type": "stat",
-          "title": "CTM Lag",
+          "title": "FAILED tasks",
+          "description": "Connect FAILED tasks",
           "gridPos": {
-            "h": 5,
+            "h": 4,
             "w": 6,
-            "x": 12,
-            "y": 11
+            "x": 18,
+            "y": 9
           },
           "datasource": {
             "type": "prometheus",
@@ -615,7 +699,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"}) or vector(0)",
+              "expr": "sum(kafka_connect_task_state{state=\"FAILED\"}) or vector(0)",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -626,7 +710,7 @@ data:
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "min": 0,
+              "noValue": "—",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -636,7 +720,174 @@ data:
                   },
                   {
                     "color": "orange",
-                    "value": 150000
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "mappings": [],
+              "min": 0,
+              "links": [
+                {
+                  "title": "Kafka detail",
+                  "url": "/d/morning-kafka-perf",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 26
+            }
+          }
+        },
+        {
+          "id": 30,
+          "type": "row",
+          "title": "Kafka · CTM collection  ·  event freshness · consumer lag",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 13
+          },
+          "panels": []
+        },
+        {
+          "id": 31,
+          "type": "stat",
+          "title": "Freshness",
+          "description": "now − max(ctm_measurement_raw.time). Soft≥120s Hard≥600s",
+          "gridPos": {
+            "h": 5,
+            "w": 8,
+            "x": 0,
+            "y": 14
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(ctm_bronze_freshness_lag_seconds{stream=\"measurement\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "decimals": 1,
+              "noValue": "—",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 120
+                  },
+                  {
+                    "color": "red",
+                    "value": 600
+                  }
+                ]
+              },
+              "mappings": [],
+              "min": 0,
+              "links": [
+                {
+                  "title": "Kafka detail",
+                  "url": "/d/morning-kafka-perf",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 30
+            }
+          }
+        },
+        {
+          "id": 32,
+          "type": "stat",
+          "title": "Consumer lag",
+          "description": "Msgs waiting in Kafka for CTM sinks. Soft≥300k Hard≥500k",
+          "gridPos": {
+            "h": 5,
+            "w": 8,
+            "x": 8,
+            "y": 14
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum(kafka_consumergroup_lag{consumergroup=~\"connect-ctm-sink-.*\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "noValue": "—",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 300000
                   },
                   {
                     "color": "red",
@@ -645,9 +896,10 @@ data:
                 ]
               },
               "mappings": [],
+              "min": 0,
               "links": [
                 {
-                  "title": "Detail",
+                  "title": "Kafka detail",
                   "url": "/d/morning-kafka-perf",
                   "targetBlank": false,
                   "keepTime": true
@@ -670,20 +922,20 @@ data:
             "textMode": "value",
             "text": {
               "titleSize": 13,
-              "valueSize": 36
+              "valueSize": 30
             }
-          },
-          "description": "CTM sink consumergroup lag 합. Soft ≥150000 · Hard ≥500000"
+          }
         },
         {
-          "id": 11,
+          "id": 33,
           "type": "stat",
-          "title": "Workers",
+          "title": "Produce−consume gap",
+          "description": "msgs/s. >0 means lag is growing",
           "gridPos": {
             "h": 5,
-            "w": 6,
-            "x": 18,
-            "y": 11
+            "w": 8,
+            "x": 16,
+            "y": 14
           },
           "datasource": {
             "type": "prometheus",
@@ -691,7 +943,173 @@ data:
           },
           "targets": [
             {
-              "expr": "count(kube_pod_status_ready{namespace=\"kafka\",pod=~\"kafka-connect-connect-.*\",condition=\"true\"}==1) or vector(0)",
+              "expr": "(sum(rate(kafka_topic_partition_current_offset{topic=\"ctm.edge.core.measurement\"}[5m])) - sum(rate(kafka_consumergroup_current_offset{consumergroup=\"connect-ctm-sink-measurement-v1\"}[5m])))",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ops",
+              "decimals": 0,
+              "noValue": "—",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 200
+                  },
+                  {
+                    "color": "red",
+                    "value": 800
+                  }
+                ]
+              },
+              "mappings": [],
+              "links": [
+                {
+                  "title": "Kafka detail",
+                  "url": "/d/morning-kafka-perf",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 30
+            }
+          }
+        },
+        {
+          "id": 40,
+          "type": "row",
+          "title": "Kafka · BANB collection  ·  ingest lag · consumer lag",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 19
+          },
+          "panels": []
+        },
+        {
+          "id": 41,
+          "type": "stat",
+          "title": "Ingest lag",
+          "description": "Pipeline health: now − max(etl_ingest_time). Soft≥120s Hard≥600s. Ignores source↔platform clock skew.",
+          "gridPos": {
+            "h": 5,
+            "w": 8,
+            "x": 0,
+            "y": 20
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(banb_bronze_freshness_lag_seconds{stream=\"env_temperature_ingest\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "decimals": 1,
+              "noValue": "—",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 120
+                  },
+                  {
+                    "color": "red",
+                    "value": 600
+                  }
+                ]
+              },
+              "mappings": [],
+              "min": 0,
+              "links": [
+                {
+                  "title": "Kafka detail",
+                  "url": "/d/morning-kafka-perf",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 30
+            }
+          }
+        },
+        {
+          "id": 42,
+          "type": "stat",
+          "title": "Consumer lag",
+          "description": "BANB + banb_env sink backlog. Soft≥300k Hard≥500k",
+          "gridPos": {
+            "h": 5,
+            "w": 8,
+            "x": 8,
+            "y": 20
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "sum(kafka_consumergroup_lag{consumergroup=~\"connect-banb-.*\"})",
               "refId": "A",
               "instant": true,
               "range": false,
@@ -702,28 +1120,29 @@ data:
             "defaults": {
               "unit": "short",
               "decimals": 0,
-              "min": 0,
+              "noValue": "—",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "red",
+                    "color": "green",
                     "value": null
                   },
                   {
                     "color": "orange",
-                    "value": 1
+                    "value": 300000
                   },
                   {
-                    "color": "green",
-                    "value": 2
+                    "color": "red",
+                    "value": 500000
                   }
                 ]
               },
               "mappings": [],
+              "min": 0,
               "links": [
                 {
-                  "title": "Detail",
+                  "title": "Kafka detail",
                   "url": "/d/morning-kafka-perf",
                   "targetBlank": false,
                   "keepTime": true
@@ -746,29 +1165,113 @@ data:
             "textMode": "value",
             "text": {
               "titleSize": 13,
-              "valueSize": 36
+              "valueSize": 30
             }
+          }
+        },
+        {
+          "id": 43,
+          "type": "stat",
+          "title": "Event lag (clock skew)",
+          "description": "now − max(capture_dt). Includes ~4m clock skew today — reference only, not Soft/Hard.",
+          "gridPos": {
+            "h": 5,
+            "w": 8,
+            "x": 16,
+            "y": 20
           },
-          "description": "Connect worker Ready 수. 경고 <1 · 정상 ≥2"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max(banb_bronze_freshness_lag_seconds{stream=\"env_temperature\"})",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "queryType": "instant"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "decimals": 0,
+              "noValue": "—",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              },
+              "mappings": [],
+              "min": 0,
+              "links": [
+                {
+                  "title": "Kafka detail",
+                  "url": "/d/morning-kafka-perf",
+                  "targetBlank": false,
+                  "keepTime": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "textMode": "value",
+            "text": {
+              "titleSize": 13,
+              "valueSize": 30
+            }
+          }
+        },
+        {
+          "id": 50,
+          "type": "text",
+          "title": "",
+          "gridPos": {
+            "h": 2,
+            "w": 24,
+            "x": 0,
+            "y": 25
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "**Read** · CTM **Freshness** = event time vs now · BANB **Ingest lag** = last landing (use for Soft) · **Consumer lag** = msgs not yet sunk · Event lag = capture_dt (skew-aware reference)"
+          },
+          "transparent": true
         }
       ],
-      "refresh": "30s",
       "schemaVersion": 39,
       "tags": [
         "morning",
-        "datapipeline",
-        "morning-nav"
+        "morning-nav",
+        "datapipeline"
       ],
       "templating": {
         "list": []
       },
       "time": {
-        "from": "now-1h",
+        "from": "now-6h",
         "to": "now"
       },
       "timepicker": {},
-      "timezone": "Asia/Seoul",
+      "timezone": "browser",
       "title": "Morning · DataPipeline",
       "uid": "morning-datapipeline",
-      "version": 1
+      "version": 1,
+      "refresh": "30s"
     }
